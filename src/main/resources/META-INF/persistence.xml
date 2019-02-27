@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+    <persistence-unit name="OracleDB" transaction-type="JTA">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>jdbc/OracleDataSource</jta-data-source>
+        <class>ru.tn.entity.ObjTypeEntity</class>
+        <class>ru.tn.entity.ObjTypePropertiesEntity</class>
+        <properties>
+            <!--<property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>-->
+            <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
+            <!--Настройки в момент разработки. Урать когда выложу в продакшен и убрать ojdbc библиотеку-->
+            <property name="hibernate.connection.url" value="jdbc:oracle:thin:@//172.16.2.156:1521/taf_nsi"/>
+            <property name="hibernate.connection.driver_class" value="oracle.jdbc.OracleDriver"/>
+        </properties>
+    </persistence-unit>
+</persistence>

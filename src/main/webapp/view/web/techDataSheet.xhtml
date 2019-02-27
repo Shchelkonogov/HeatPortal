@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="/view/template/portalTempl.xhtml">
+        <ui:define name="content">
+            <h:form id="navig" class="flexNavigation">
+                <p:panel header="Навигация" class="flexNavigation">
+
+                    <h:panelGrid columns="2" columnClasses="col1, col2">
+                        <p:outputLabel for="objType" value="Тип объекта:"/>
+                        <p:selectOneMenu id="objType" value="#{techDataSheet.selectedObjType}" dynamic="true"
+                                         style="display: block; min-width: 120px">
+                            <f:selectItems value="#{techDataSheet.objTypeList}" var="type"
+                                           itemLabel="#{type.objTypeName}" itemValue="#{type.objTypeId}"/>
+
+                            <p:ajax event="itemSelect" listener="#{techDataSheet.changeObjTypeListener}"
+                                    update=":navig:search :navig:orgTree"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+
+                    <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{techDataSheet.root}" var="node" dynamic="true"
+                            selectionMode="single" selection="#{techDataSheet.selectedNode}" cache="false"
+                            style="width: auto; height: 100%; overflow: auto; margin-right: 3px" deferred="true">
+                        <p:treeNode>
+                            <h:outputText value="#{node.name}"/>
+                        </p:treeNode>
+
+                        <p:ajax event="select" listener="#{techDataSheet.onNodeSelect}"/>
+                        <p:ajax event="expand" listener="#{techDataSheet.onNodeExpand}"/>
+                        <p:ajax event="collapse" listener="#{techDataSheet.onNodeCollapse}"/>
+                    </p:tree>
+
+                    <h:panelGrid columns="2" columnClasses="col1, col2">
+                        <p:outputLabel for="search" value="Тип поиска:"/>
+                        <p:selectOneMenu id="search" value="#{techDataSheet.selectedSearch}" dynamic="true"
+                                         style="display: block; min-width: 120px">
+                            <f:selectItems value="#{techDataSheet.searchList}" var="prop"
+                                           itemLabel="#{prop.objTypeValue}" itemValue="#{prop.objTypeId}"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                    <h:form>
+                        <p:inputText style="margin: 2px" value="#{techDataSheet.searchText}"/>
+                        <p:commandButton value="Перестроить" action="#{techDataSheet.updateSearch}"
+                                         style="margin: 2px; height: 40px" update=":navig:orgTree"/>
+                    </h:form>
+
+                </p:panel>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

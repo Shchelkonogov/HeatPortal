@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <h:outputStylesheet name="style.css" library="css"/>
+</h:head>
+<h:body>
+    <p:ajaxStatus style="width: 32px; height: 32px; position: fixed; right: 20px; bottom: 20px">
+        <f:facet name="start">
+            <i class="fa fa-spin fa-spinner" style="font-size: 3em"/>
+        </f:facet>
+
+        <f:facet name="complete">
+            <h:outputText value="" />
+        </f:facet>
+    </p:ajaxStatus>
+
+    <div id="page">
+        <div id="header">
+            <ui:insert name="header">
+                <ui:include src="/view/template/headerTempl.xhtml"/>
+            </ui:insert>
+        </div>
+        <div id="content">
+            <ui:insert name="content">
+                <ui:include src="/view/template/contentTempl.xhtml"/>
+            </ui:insert>
+        </div>
+        <div id="footer">
+            <ui:insert name="footer">
+                <ui:include src="/view/template/footerTempl.xhtml"/>
+            </ui:insert>
+        </div>
+    </div>
+</h:body>
+</html>

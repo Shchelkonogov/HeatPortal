@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition>
+        <h:form>
+        <p:menubar style="size: transparent">
+            <p:submenu label="Оперативный контроль" icon="fa fa-home">
+                <p:submenu style="width: 104% !important;" label="Ведомость параметров">
+                    <p:menuitem class="menu_item_1" style="width: max-content !important;"
+                                value="Ведомость технологических параметров"
+                                icon="fa fa-list-alt"
+                                url="#{request.contextPath}/../view/web/techDataSheet.xhtml"/>
+                    <p:menuitem class="menu_item_1" value="Многофункциональный отчет" url="#"/>
+                </p:submenu>
+                <p:separator/>
+                <p:menuitem class="menu_item_1" value="Контроль состояний" url="#"/>
+                <p:menuitem class="menu_item_1" value="Технологическая связь объектов" url="#"/>
+                <p:menuitem class="menu_item_1" value="Последние данные" url="#"/>
+            </p:submenu>
+
+            <p:menuitem value="Описание системы" icon="fa fa-file-o" url="#"/>
+
+            <p:submenu label="Администрирование" rendered="#{headerTemplate.userAllowedAccess}" icon="fa fa-gear">
+                <p:menuitem styleClass="menu_item_1" value="Регистрация пользователей"/>
+            </p:submenu>
+
+            <f:facet name="options">
+                <h:form>
+                    <p:outputLabel style="margin:1px 10px 1px 1px;" value="#{headerTemplate.user}"/>
+                    <p:commandButton value="Выход" icon="fa fa-sign-out" action="#{headerTemplate.logout}"/>
+                </h:form>
+            </f:facet>
+        </p:menubar>
+        </h:form>
+    </ui:composition>
+</h:body>
+</html>
