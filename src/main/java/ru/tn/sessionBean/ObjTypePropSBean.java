@@ -7,10 +7,12 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Stateless bean, для работы с сущностью свойства объектов
+ */
 @Stateless
 public class ObjTypePropSBean {
 
@@ -20,6 +22,12 @@ public class ObjTypePropSBean {
     @PersistenceContext(unitName = "OracleDB")
     private EntityManager em;
 
+    /**
+     * Метод возвращает массив свойств объектов в соответствии с типом объекта.
+     * Добавляется свойство поиска по имени
+     * @param objTypeId типо объекта
+     * @return массив свойст
+     */
     public List<ObjTypePropertyModel> getObjTypeProps(long objTypeId) {
         List<ObjTypePropertyModel> result = new ArrayList<>(
                 Collections.singletonList(new ObjTypePropertyModel(DEFAULT_SEARCH_VALUE, DEFAULT_SEARCH_ID)));

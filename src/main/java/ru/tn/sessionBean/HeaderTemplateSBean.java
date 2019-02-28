@@ -8,6 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Stateless bean, для получения данных заголовка страницы
+ */
 @Stateless
 public class HeaderTemplateSBean {
 
@@ -16,6 +19,11 @@ public class HeaderTemplateSBean {
     @Resource(mappedName = "jdbc/OracleDataSource")
     private DataSource ds;
 
+    /**
+     * Получение описения пользователя по его имени
+     * @param userName имя пользователя
+     * @return описание пользователя
+     */
     public String getUserDescription(String userName) {
         try (Connection connect = ds.getConnection();
                 PreparedStatement stm = connect.prepareStatement(SQL)) {

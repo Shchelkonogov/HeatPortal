@@ -22,10 +22,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 @ManagedBean(name = "techDataSheet")
 @ViewScoped
 public class TechDataSheetMBean implements Serializable {
+
+    private static Logger log = Logger.getLogger(TechDataSheetMBean.class.getName());
 
     @ManagedProperty("#{headerTemplate.userPrincipal}")
     private String user;
@@ -37,10 +40,12 @@ public class TechDataSheetMBean implements Serializable {
     @EJB
     private ObjTypePropSBean objTypePropBean;
 
+    //Переменные нужные для типа объекта
     private long selectedObjType;
     private List<ObjTypeEntity> objTypeList;
     private static final int DEFAULT_TYPE_ID = 1;
 
+    //Переменные нужные для дерева
     private TreeNode root;
     private TreeNode selectedNode;
     private TreeNode oldSelectNode;
@@ -50,6 +55,7 @@ public class TechDataSheetMBean implements Serializable {
     private static final String DEFAULT_NODE_NAME = "NODE";
     private static final String DEFAULT_PARENT_NODE = "S545";
 
+    //Переменные нужные для поиска
     private long selectedSearch;
     private List<ObjTypePropertyModel> searchList;
     private String searchText;
@@ -68,7 +74,12 @@ public class TechDataSheetMBean implements Serializable {
         addTreeItems(root);
     }
 
+    /**
+     * Метод доваляет новые данные в ветку дерева
+     * @param rootNode ветка дерева
+     */
     private void addTreeItems(TreeNode rootNode) {
+        //Проверка надо ли перестраивать узел
         if ((rootNode == root) || ((rootNode.getChildCount() == 1)
                 && (((TreeNodeModel) rootNode.getChildren().get(0).getData()).getName().equals(DEFAULT_NODE_NAME)))) {
             rootNode.getChildren().clear();
@@ -76,9 +87,10 @@ public class TechDataSheetMBean implements Serializable {
             return;
         }
 
-        System.out.println(System.currentTimeMillis());
+        //Загрузка данных для узла
+        log.info("TechDataSheetMBean.addTreeItems start load data for node: " + parentNode + " " + System.currentTimeMillis());
         List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 1, parentNode);
-        System.out.println(System.currentTimeMillis());
+        log.info("TechDataSheetMBean.addTreeItems end load data for node: " + parentNode + " " + System.currentTimeMillis());
 
         Collections.sort(data);
 
@@ -89,6 +101,8 @@ public class TechDataSheetMBean implements Serializable {
                 TreeNode node = new DefaultTreeNode(item, rootNode);
                 node.getChildren().add(new DefaultTreeNode(new TreeNodeModel(DEFAULT_NODE_NAME)));
 
+                //В случае если заполнен nodePath (используется для раскрытии множества веток)
+                //открывает ветку и вызывает загрузку данных для него
                 if (!nodePath.isEmpty()
                         && (item.getId().equals(((TreeNodeModel) nodePath.get(nodePath.size() - 1).getData()).getId()))) {
                     nodePath.remove(nodePath.size() - 1);
@@ -99,21 +113,35 @@ public class TechDataSheetMBean implements Serializable {
             }
         }
 
-        System.out.println(nodePath);
         nodePath.clear();
     }
 
+    /**
+     * Обработчик события открытия ветки дерева
+     * @param event ветка дерева
+     */
     public void onNodeExpand(NodeExpandEvent event) {
+        log.info("TechDataSheetMBean.onNodeExpand expand: " + event.getTreeNode());
         updateSelect(selectedNode, event.getTreeNode());
 
         parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
         addTreeItems(event.getTreeNode());
     }
 
+    /**
+     * обработчик события свертывания ветки дерева
+     * @param event ветка дерева
+     */
     public void onNodeCollapse(NodeCollapseEvent event) {
+        log.info("TechDataSheetMBean.onNodeCollapse collapse: " + event.getTreeNode());
         updateSelect(selectedNode, event.getTreeNode());
     }
 
+    /**
+     * Метод обновляет выделение ветки дерева с помощью JS комманд
+     * @param oldNode старая ветка
+     * @param newNode новая ветка
+     */
     private void updateSelect(TreeNode oldNode, TreeNode newNode) {
         StringBuilder sb = new StringBuilder();
         if (oldNode != null) {
@@ -131,6 +159,11 @@ public class TechDataSheetMBean implements Serializable {
         PrimeFaces.current().executeScript(sb.toString());
     }
 
+    /**
+     * Обработчик выделения ветки дерева
+     * обрабатывает двойное нажатие
+     * @param event ветка дерева
+     */
     public void onNodeSelect(NodeSelectEvent event) {
         if ((oldSelectNode != null) && (oldSelectNode == selectedNode)
                 && ((System.currentTimeMillis() - timeOldSelectNode) < 500)) {
@@ -148,9 +181,13 @@ public class TechDataSheetMBean implements Serializable {
         }
     }
 
+    /**
+     * Метод раскрывает ветку дерева с помощью JS команды
+     * В этом случает обновляется только одна ветка а не все дерево
+     * @param value открыть или закрыть ветку
+     * @param node ветка дерева
+     */
     private void setExpandedNode(boolean value, TreeNode node) {
-        System.out.println("expand " + node);
-
         StringBuilder sb = new StringBuilder();
         sb.append("PrimeFaces.widgets.orgTreeWidget.");
         if (value) {
@@ -165,15 +202,31 @@ public class TechDataSheetMBean implements Serializable {
         PrimeFaces.current().executeScript(sb.toString());
     }
 
+    /**
+     * Обработчик события изменения выбора типа объекта
+     */
     public void changeObjTypeListener() {
         reloadAllTree();
+
+        //Обновляем список типов поиска
+        searchList.clear();
+        searchList.addAll(objTypePropBean.getObjTypeProps(selectedObjType));
     }
 
+    /**
+     * Нажатие на кнопку "перестроить"
+     */
     public void updateSearch() {
         reloadAllTree();
     }
 
+    /**
+     * Метод для перестройки всего дерева.
+     * Определяет глубину перестройки по выделенному объекту
+     * Стирает все дерево и строить его пытаясь открыть старые узлы, если они есть
+     */
     private void reloadAllTree() {
+        //Определяем глубину вхождения
         if (selectedNode == null) {
             selectedNode = root;
         } else {
@@ -188,15 +241,14 @@ public class TechDataSheetMBean implements Serializable {
         }
         nodePath.remove(nodePath.size() - 1);
 
-        System.out.println(nodePath);
+        log.info("TechDataSheetMBean.reloadAllTree глубина обновления: " + nodePath);
+
         selectedNode = null;
 
+        //Чистим дерево и запускаем его перстроение
         root.getChildren().clear();
         parentNode = DEFAULT_PARENT_NODE;
         addTreeItems(root);
-
-        searchList.clear();
-        searchList.addAll(objTypePropBean.getObjTypeProps(selectedObjType));
     }
 
     public String getSearchText() {

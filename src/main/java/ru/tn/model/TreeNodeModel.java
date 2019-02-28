@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class TreeNodeModel implements Serializable, Comparable<Object> {
 
-    private String name, id, objectType;
+    private String name, id;
     private boolean leaf = true;
 
     public TreeNodeModel(String name) {
@@ -14,8 +14,8 @@ public class TreeNodeModel implements Serializable, Comparable<Object> {
     public TreeNodeModel(String name, String id, String objectType) {
         this.name = name;
         this.id = id;
-        this.objectType = objectType;
 
+        //Если тип начинается на "S", то это узел дерева
         if (objectType.matches("[S]\\d*")) {
             leaf = false;
         }
@@ -27,10 +27,6 @@ public class TreeNodeModel implements Serializable, Comparable<Object> {
 
     public String getId() {
         return id;
-    }
-
-    public String getObjectType() {
-        return objectType;
     }
 
     public boolean isLeaf() {

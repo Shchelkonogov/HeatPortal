@@ -12,6 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Stateless bean, для работы с деревом обектов
+ */
 @Stateless
 public class TreeSBean {
 
@@ -22,13 +25,14 @@ public class TreeSBean {
     private DataSource ds;
 
     /**
-     *
-     * @param objectTypeId -1 для поиска по всем типам
-     * @param searchTypeId -1 для поиска по имени
-     * @param searchText
-     * @param userName
-     * @param linkingTypeId 1 линкованные 0 не линкованные -1 все
-     * @param parentNode
+     * Метод возвращает массив элементов ветки дерева
+     * @param objectTypeId тип объекта (-1 все типы)
+     * @param searchTypeId тип поиска (-1 поиск по имени)
+     * @param searchText текст поиска
+     * @param userName имя пользователя от которого строится дерево
+     * @param linkingTypeId тип линковки объектов (1 линкованные, 0 не линкованные, -1 все)
+     * @param parentNode id элемента родителя дерева
+     * @return массив с элементами ветки
      */
     public List<TreeNodeModel> getTreeNode(long objectTypeId, long searchTypeId, String searchText,
                                            String userName, int linkingTypeId, String parentNode) {
