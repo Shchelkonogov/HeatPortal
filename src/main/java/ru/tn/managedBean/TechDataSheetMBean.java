@@ -89,7 +89,7 @@ public class TechDataSheetMBean implements Serializable {
 
         //Загрузка данных для узла
         log.info("TechDataSheetMBean.addTreeItems start load data for node: " + parentNode + " " + System.currentTimeMillis());
-        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 1, parentNode);
+        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 0, parentNode);
         log.info("TechDataSheetMBean.addTreeItems end load data for node: " + parentNode + " " + System.currentTimeMillis());
 
         Collections.sort(data);

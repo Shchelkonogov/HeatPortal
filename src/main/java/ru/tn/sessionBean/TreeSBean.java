@@ -30,7 +30,7 @@ public class TreeSBean {
      * @param searchTypeId тип поиска (-1 поиск по имени)
      * @param searchText текст поиска
      * @param userName имя пользователя от которого строится дерево
-     * @param linkingTypeId тип линковки объектов (1 линкованные, 0 не линкованные, -1 все)
+     * @param linkingTypeId тип линковки объектов (1 линкованные, -1 не линкованные, 0 все)
      * @param parentNode id элемента родителя дерева
      * @return массив с элементами ветки
      */
