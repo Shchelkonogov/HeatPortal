@@ -13,27 +13,27 @@
         #container {
             display: table;
             margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 5px;
         }
     </style>
 </h:head>
 <h:body>
     <div id="container">
-        <p:panel>
-            <h:form id="login" onsubmit="action='j_security_check'" prependId="false">
-                <h:panelGrid columns="2">
-                    <p:outputLabel for="j_username" value="Username"/>
-                    <p:inputText id="j_username"/>
-                    <p:outputLabel for="j_password" value="Password"/>
-                    <p:password id="j_password" autocomplete="off"/>
-                </h:panelGrid>
-                <div align="center">
-                    <p:commandButton id="submit" value="Login" ajax="false" />
-                </div>
-            </h:form>
+        <h:form id="login" onsubmit="action='j_security_check'" prependId="false">
+            <h:panelGrid columns="2">
+                <p:outputLabel for="j_username" value="Username"/>
+                <p:inputText id="j_username"/>
+                <p:outputLabel for="j_password" value="Password"/>
+                <p:password id="j_password" autocomplete="off"/>
+            </h:panelGrid>
             <div align="center">
-                <h:outputText rendered="#{param['wrongCredentials'] != null}" value="Wrong username or password" />
+                <p:commandButton id="submit" value="Login" ajax="false" />
             </div>
-        </p:panel>
+        </h:form>
+        <div align="center">
+            <h:outputText rendered="#{param['wrongCredentials'] != null}" value="Wrong username or password" />
+        </div>
     </div>
 </h:body>
 </html>
