@@ -1,43 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
-<h:head/>
-<h:body>
-    <ui:composition>
-        <h:form>
-            <p:menubar>
-                <p:submenu label="Оперативный контроль" icon="pi pi-home">
-                    <p:submenu label="Ведомость параметров">
-                        <p:menuitem value="Ведомость технологических параметров"
-                                    icon="pi pi-table"
-                                    url="#{request.contextPath}/view/web/techDataSheet.xhtml"/>
-                        <p:menuitem value="Многофункциональный отчет" url="#"/>
-                    </p:submenu>
-                    <p:separator/>
-                    <p:menuitem value="Контроль состояний" url="#"/>
-                    <p:menuitem value="Технологическая связь объектов" url="#"/>
-                    <p:menuitem value="Последние данные" url="#"/>
+<ui:composition xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        <p:menubar>
+            <p:submenu label="Оперативный контроль" icon="pi pi-home">
+                <p:submenu label="Ведомость параметров">
+                    <p:menuitem value="Ведомость технологических параметров"
+                                icon="pi pi-table"
+                                url="#{request.contextPath}/view/web/techDataSheet.xhtml"/>
+                    <p:menuitem value="Многофункциональный отчет" url="#"/>
                 </p:submenu>
+                <p:separator/>
+                <p:menuitem value="Контроль состояний" url="#"/>
+                <p:menuitem value="Технологическая связь объектов" url="#"/>
+                <p:menuitem value="Последние данные" url="#"/>
+            </p:submenu>
 
-                <p:menuitem value="Описание системы" icon="pi pi-file" url="#"/>
+            <p:menuitem value="Описание системы" icon="pi pi-file" url="#"/>
 
-                <p:submenu label="Администрирование"
-                           rendered="#{headerTemplate.userAllowedAccess}"
-                           icon="pi pi-cog">
-                    <p:menuitem  value="Регистрация пользователей"/>
-                </p:submenu>
+            <p:submenu label="Администрирование"
+                       rendered="#{headerTemplate.userAllowedAccess}"
+                       icon="pi pi-cog">
+                <p:menuitem  value="Регистрация пользователей"/>
+            </p:submenu>
 
-                <f:facet name="options">
-                    <p:outputLabel style="margin: 1px 10px 1px 1px;" value="#{headerTemplate.user}"/>
-                    <p:commandButton value="Выход" icon="pi pi-sign-out" action="#{headerTemplate.logout}"/>
-                </f:facet>
-            </p:menubar>
-        </h:form>
-    </ui:composition>
-</h:body>
-</html>
+            <f:facet name="options">
+                <p:outputLabel style="margin: 1px 10px 1px 1px;" value="#{headerTemplate.user}"/>
+                <p:commandButton value="Выход" icon="pi pi-sign-out" action="#{headerTemplate.logout}"/>
+            </f:facet>
+        </p:menubar>
+    </h:form>
+</ui:composition>
