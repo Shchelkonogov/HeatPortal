@@ -8,11 +8,13 @@
       xmlns:p="http://primefaces.org/ui">
 <h:head>
     <h:outputStylesheet name="style.css" library="css"/>
+    <script type="text/javascript" src="https://cdn.rawgit.com/lingtalfi/simpledrag/master/simpledrag.js"/>
+    <h:outputScript name="script.js" library="js" target="body"/>
 </h:head>
 <h:body>
     <p:ajaxStatus style="width: 32px; height: 32px; position: fixed; right: 20px; bottom: 20px">
         <f:facet name="start">
-            <i class="fa fa-spin fa-spinner" style="font-size: 3em"/>
+            <i class="pi pi-spin pi-spinner" style="font-size: 3em"/>
         </f:facet>
 
         <f:facet name="complete">
@@ -21,20 +23,30 @@
     </p:ajaxStatus>
 
     <div id="page">
-        <div id="header">
+        <div class="top">
             <ui:insert name="header">
                 <ui:include src="/view/template/headerTempl.xhtml"/>
             </ui:insert>
         </div>
-        <div id="content">
-            <ui:insert name="content">
-                <ui:include src="/view/template/contentTempl.xhtml"/>
-            </ui:insert>
-        </div>
-        <div id="footer">
-            <ui:insert name="footer">
-                <ui:include src="/view/template/footerTempl.xhtml"/>
-            </ui:insert>
+
+        <div class="panes-container">
+            <div class="left-pane" id="left-pane">
+                <div class="box">
+                    <ui:insert name="left-pane">
+                        <ui:include src="/view/template/contentTempl.xhtml"/>
+                    </ui:insert>
+                </div>
+            </div>
+
+            <div class="panes-separator" id="panes-separator"/>
+
+            <div class="right-pane" id="right-pane">
+                <div class="box">
+                    <ui:insert name="right-pane">
+                        <ui:include src="/view/template/contentTempl.xhtml"/>
+                    </ui:insert>
+                </div>
+            </div>
         </div>
     </div>
 </h:body>

@@ -1,0 +1,59 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+    <p:panel id="navigPanel" header="Навигация" style="width: 100%; height: 100%;">
+
+        <h:form id="navig" style="height: calc(100% - 43px)">
+            <h:panelGrid columns="2" styleClass="fieldwrapper" columnClasses=",col">
+                <p:outputLabel for="objType" value="Тип объекта:"/>
+                <p:selectOneMenu id="objType" value="#{navigation.selectedObjType}" dynamic="true"
+                                 style="width: 100%; margin-right: -100px;">
+                    <f:selectItems value="#{navigation.objTypeList}" var="type"
+                                   itemLabel="#{type.objTypeName}" itemValue="#{type.objTypeId}"/>
+
+                    <p:ajax event="itemSelect" listener="#{navigation.changeObjTypeListener}"
+                            update=":navig:search :navig:orgTree"/>
+                </p:selectOneMenu>
+            </h:panelGrid>
+
+            <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.root}" var="node" dynamic="true"
+                    selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
+                    styleClass="tree" style="width: 100%">
+                <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
+                    <h:outputText value="#{node.name}"/>
+                </p:treeNode>
+
+                <p:treeNode type="leaf" icon="pi pi-file">
+                    <h:outputText value="#{node.name}"/>
+                </p:treeNode>
+
+                <p:ajax event="select" listener="#{navigation.onNodeSelect}"/>
+                <p:ajax event="expand" listener="#{navigation.onNodeExpand}"/>
+                <p:ajax event="collapse" listener="#{navigation.onNodeCollapse}"/>
+            </p:tree>
+
+            <h:panelGrid columns="2" styleClass="fieldwrapper" columnClasses=",col" style="margin-top: 3px">
+                <p:outputLabel for="search" value="Тип поиска:"/>
+                <p:selectOneMenu id="search" value="#{navigation.selectedSearch}" dynamic="true"
+                                 style="width: 100%; margin-right: -100px;">
+                    <f:selectItems value="#{navigation.searchList}" var="prop"
+                                   itemLabel="#{prop.objTypeValue}" itemValue="#{prop.objTypeId}"/>
+                </p:selectOneMenu>
+            </h:panelGrid>
+        </h:form>
+
+        <h:form id="searchButton">
+            <h:panelGrid columns="2" columnClasses="col" style="margin-top: 5px">
+                <p:inputText  value="#{navigation.searchText}" style="width: 100%"/>
+                <p:commandButton value="Перестроить" action="#{navigation.updateSearch()}"
+                                 update=":navig:orgTree"/>
+            </h:panelGrid>
+        </h:form>
+
+        <h:form id="action">
+            #{bean[method](navigation.selectedNodeId)}
+        </h:form>
+    </p:panel>
+</ui:composition>

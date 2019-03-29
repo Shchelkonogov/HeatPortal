@@ -10,50 +10,25 @@
 </h:head>
 <h:body>
     <ui:composition template="/view/template/portalTempl.xhtml">
-        <ui:define name="content">
-            <h:form id="navig" class="flexNavigation">
-                <p:panel header="Навигация" class="flexNavigation">
+        <ui:param name="bean" value="#{data}"/>
+        <ui:param name="method" value="showName"/>
+        <ui:param name="method1" value="headerName"/>
 
-                    <h:panelGrid columns="2" columnClasses="col1, col2">
-                        <p:outputLabel for="objType" value="Тип объекта:"/>
-                        <p:selectOneMenu id="objType" value="#{techDataSheet.selectedObjType}" dynamic="true"
-                                         style="display: block; min-width: 120px">
-                            <f:selectItems value="#{techDataSheet.objTypeList}" var="type"
-                                           itemLabel="#{type.objTypeName}" itemValue="#{type.objTypeId}"/>
+        <ui:define name="left-pane">
+            <ui:include src="/view/template/navigTempl.xhtml"/>
+        </ui:define>
 
-                            <p:ajax event="itemSelect" listener="#{techDataSheet.changeObjTypeListener}"
-                                    update=":navig:search :navig:orgTree"/>
-                        </p:selectOneMenu>
-                    </h:panelGrid>
-
-                    <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{techDataSheet.root}" var="node" dynamic="true"
-                            selectionMode="single" selection="#{techDataSheet.selectedNode}" cache="false"
-                            style="width: auto; height: 100%; overflow: auto; margin-right: 3px" deferred="true">
-                        <p:treeNode>
-                            <h:outputText value="#{node.name}"/>
-                        </p:treeNode>
-
-                        <p:ajax event="select" listener="#{techDataSheet.onNodeSelect}"/>
-                        <p:ajax event="expand" listener="#{techDataSheet.onNodeExpand}"/>
-                        <p:ajax event="collapse" listener="#{techDataSheet.onNodeCollapse}"/>
-                    </p:tree>
-
-                    <h:panelGrid columns="2" columnClasses="col1, col2">
-                        <p:outputLabel for="search" value="Тип поиска:"/>
-                        <p:selectOneMenu id="search" value="#{techDataSheet.selectedSearch}" dynamic="true"
-                                         style="display: block; min-width: 120px">
-                            <f:selectItems value="#{techDataSheet.searchList}" var="prop"
-                                           itemLabel="#{prop.objTypeValue}" itemValue="#{prop.objTypeId}"/>
-                        </p:selectOneMenu>
-                    </h:panelGrid>
-                    <h:form>
-                        <p:inputText style="margin: 2px" value="#{techDataSheet.searchText}"/>
-                        <p:commandButton value="Перестроить" action="#{techDataSheet.updateSearch}"
-                                         style="margin: 2px; height: 40px" update=":navig:orgTree"/>
-                    </h:form>
-
-                </p:panel>
-            </h:form>
+        <ui:define name="right-pane">
+            <p:panel id="dataPanel" header="Архивные данные #{data.headerName}" style="width: 100%; height: 100%;">
+                <p:dataTable var="test" value="#{data.gridData}">
+                    <p:columns var="column" value="#{data.columns}">
+                        <f:facet name="header">
+                            <h:outputText value="#{column.header}"/>
+                        </f:facet>
+                        <h:outputText value="#{test[column.property]}"/>
+                    </p:columns>
+                </p:dataTable>
+            </p:panel>
         </ui:define>
     </ui:composition>
 </h:body>
