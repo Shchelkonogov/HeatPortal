@@ -4,7 +4,6 @@ html, body {
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -52,7 +51,6 @@ li.ui-menubar-options {
 
 .right-pane {
     flex: auto;
-    background: #eee;
 }
 
 .panes-container,
@@ -103,4 +101,16 @@ li.ui-menubar-options {
     /* Allow box to grow and shrink, and ensure they are all equally sized */
     flex: 1 1 auto;
     overflow: auto;
+}
+
+.ui-datatable table {
+    table-layout: auto !important;
+}
+
+#dataPanel_content {
+    height: calc(100% - 100px);
+}
+
+#dataGrid .ui-datatable-scrollable-body {
+    max-height: calc(100% - 37px) !important;
 }

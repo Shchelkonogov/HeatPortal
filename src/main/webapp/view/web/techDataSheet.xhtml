@@ -12,7 +12,7 @@
     <ui:composition template="/view/template/portalTempl.xhtml">
         <ui:param name="bean" value="#{data}"/>
         <ui:param name="method" value="showName"/>
-        <ui:param name="method1" value="headerName"/>
+        <ui:param name="updatePath" value=":dataPanel"/>
 
         <ui:define name="left-pane">
             <ui:include src="/view/template/navigTempl.xhtml"/>
@@ -20,7 +20,8 @@
 
         <ui:define name="right-pane">
             <p:panel id="dataPanel" header="Архивные данные #{data.headerName}" style="width: 100%; height: 100%;">
-                <p:dataTable var="test" value="#{data.gridData}">
+                <p:dataTable id="dataGrid" var="test" value="#{data.gridData}" scrollable="true" scrollHeight="100"
+                             style="height: 100%;" emptyMessage="Не выбран объект">
                     <p:columns var="column" value="#{data.columns}">
                         <f:facet name="header">
                             <h:outputText value="#{column.header}"/>
