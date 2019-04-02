@@ -16,7 +16,7 @@ public class HeaderTemplateSBean {
 
     private static final String SQL = "select u_description from m_adm_users where u_name = ?";
 
-    @Resource(mappedName = "jdbc/OracleDataSource")
+    @Resource(name = "jdbc/dataSource")
     private DataSource ds;
 
     /**

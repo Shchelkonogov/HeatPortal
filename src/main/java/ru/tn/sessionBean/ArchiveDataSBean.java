@@ -20,7 +20,7 @@ public class ArchiveDataSBean {
             "from table (dsp_0032t.get_obj_params(?))";
     private static final String SQL_PATH = "select dsp_0032t.get_obj_full_path(?) from dual";
 
-    @Resource(mappedName = "jdbc/OracleDataSource")
+    @Resource(name = "jdbc/dataSource")
     private DataSource ds;
 
     public List<ArchiveGridDataM> loadData(int objectId) {
@@ -31,7 +31,8 @@ public class ArchiveDataSBean {
 
             ResultSet res = stm.executeQuery();
             while (res.next()) {
-                data.add(new ArchiveGridDataM(res.getString("par_memo"), res.getString("proc_name"), res.getString("measure_name"), null, null, null));
+                data.add(new ArchiveGridDataM(res.getString("par_memo"), res.getString("proc_name"),
+                        res.getString("measure_name"), null, null, null));
             }
         } catch (SQLException e) {
             e.printStackTrace();

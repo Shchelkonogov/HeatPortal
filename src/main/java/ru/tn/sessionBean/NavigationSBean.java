@@ -34,7 +34,7 @@ public class NavigationSBean {
     private static final String DEFAULT_SEARCH_VALUE = "По имени";
     private static final long DEFAULT_SEARCH_ID = -1;
 
-    @Resource(mappedName = "jdbc/OracleDataSource")
+    @Resource(name = "jdbc/dataSource")
     private DataSource ds;
 
     @EJB
