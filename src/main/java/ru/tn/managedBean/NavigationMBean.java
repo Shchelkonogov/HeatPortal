@@ -9,36 +9,34 @@ import org.primefaces.model.TreeNode;
 import ru.tn.entity.ObjTypeEntity;
 import ru.tn.model.ObjTypePropertyModel;
 import ru.tn.model.TreeNodeModel;
-import ru.tn.sessionBean.ObjTypePropSBean;
-import ru.tn.sessionBean.ObjTypeSBean;
-import ru.tn.sessionBean.TreeSBean;
+import ru.tn.sessionBean.NavigationSBean;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.view.facelets.FaceletContext;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@ManagedBean(name = "techDataSheet")
+@ManagedBean(name = "navigation")
 @ViewScoped
-public class TechDataSheetMBean implements Serializable {
+public class NavigationMBean implements Serializable {
 
-    private static Logger log = Logger.getLogger(TechDataSheetMBean.class.getName());
+    private static Logger log = Logger.getLogger(NavigationMBean.class.getName());
 
     @ManagedProperty("#{headerTemplate.userPrincipal}")
     private String user;
 
     @EJB
-    private ObjTypeSBean objTypeBean;
-    @EJB
-    private TreeSBean bean;
-    @EJB
-    private ObjTypePropSBean objTypePropBean;
+    private NavigationSBean bean;
 
     //Переменные нужные для типа объекта
     private long selectedObjType;
@@ -47,6 +45,7 @@ public class TechDataSheetMBean implements Serializable {
 
     //Переменные нужные для дерева
     private TreeNode root;
+    private String selectedNodeId;
     private TreeNode selectedNode;
     private TreeNode oldSelectNode;
     private long timeOldSelectNode;
@@ -63,12 +62,12 @@ public class TechDataSheetMBean implements Serializable {
     @PostConstruct
     private void init() {
         objTypeList = new ArrayList<>();
-        objTypeList.addAll(objTypeBean.getTypes());
+        objTypeList.addAll(bean.getTypes());
         selectedObjType = DEFAULT_TYPE_ID;
 
         searchList = new ArrayList<>();
-        searchList.addAll(objTypePropBean.getObjTypeProps(selectedObjType));
-        selectedSearch = objTypePropBean.getDefaultSearchId();
+        searchList.addAll(bean.getObjTypeProps(selectedObjType));
+        selectedSearch = bean.getDefaultSearchId();
 
         root = new DefaultTreeNode(new TreeNodeModel("ROOT"), null);
         addTreeItems(root);
@@ -88,15 +87,15 @@ public class TechDataSheetMBean implements Serializable {
         }
 
         //Загрузка данных для узла
-        log.info("TechDataSheetMBean.addTreeItems start load data for node: " + parentNode + " " + System.currentTimeMillis());
-        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 0, parentNode);
-        log.info("TechDataSheetMBean.addTreeItems end load data for node: " + parentNode + " " + System.currentTimeMillis());
+        log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode + " " + System.currentTimeMillis());
+        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 1, parentNode);
+        log.info("NavigationMBean.addTreeItems end load data for node: " + parentNode + " " + System.currentTimeMillis());
 
         Collections.sort(data);
 
         for (TreeNodeModel item: data) {
             if (item.isLeaf()) {
-                rootNode.getChildren().add(new DefaultTreeNode(item));
+                new DefaultTreeNode("leaf", item, rootNode);
             } else {
                 TreeNode node = new DefaultTreeNode(item, rootNode);
                 node.getChildren().add(new DefaultTreeNode(new TreeNodeModel(DEFAULT_NODE_NAME)));
@@ -121,11 +120,15 @@ public class TechDataSheetMBean implements Serializable {
      * @param event ветка дерева
      */
     public void onNodeExpand(NodeExpandEvent event) {
-        log.info("TechDataSheetMBean.onNodeExpand expand: " + event.getTreeNode());
+        log.log(Level.INFO, "NavigationMBean.onNodeExpand load start");
+
+        log.info("NavigationMBean.onNodeExpand expand: " + event.getTreeNode());
         updateSelect(selectedNode, event.getTreeNode());
 
         parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
         addTreeItems(event.getTreeNode());
+
+        log.log(Level.INFO, "NavigationMBean.onNodeExpand ok load");
     }
 
     /**
@@ -133,7 +136,7 @@ public class TechDataSheetMBean implements Serializable {
      * @param event ветка дерева
      */
     public void onNodeCollapse(NodeCollapseEvent event) {
-        log.info("TechDataSheetMBean.onNodeCollapse collapse: " + event.getTreeNode());
+        log.info("NavigationMBean.onNodeCollapse collapse: " + event.getTreeNode());
         updateSelect(selectedNode, event.getTreeNode());
     }
 
@@ -167,13 +170,23 @@ public class TechDataSheetMBean implements Serializable {
     public void onNodeSelect(NodeSelectEvent event) {
         if ((oldSelectNode != null) && (oldSelectNode == selectedNode)
                 && ((System.currentTimeMillis() - timeOldSelectNode) < 500)) {
-            if (selectedNode.isExpanded()) {
-                setExpandedNode(false, selectedNode);
-            } else {
-                parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
-                addTreeItems(event.getTreeNode());
+            log.info("NavigationMBean.onNodeSelect dblClick");
 
-                setExpandedNode(true, selectedNode);
+            if (((TreeNodeModel) selectedNode.getData()).isLeaf()) {
+                PrimeFaces.current().ajax().update(":action");
+
+                FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
+                        .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
+                PrimeFaces.current().ajax().update((String) faceletContext.getAttribute("updatePath"));
+            } else {
+                if (selectedNode.isExpanded()) {
+                    setExpandedNode(false, selectedNode);
+                } else {
+                    parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
+                    addTreeItems(event.getTreeNode());
+
+                    setExpandedNode(true, selectedNode);
+                }
             }
         } else {
             oldSelectNode = selectedNode;
@@ -210,7 +223,7 @@ public class TechDataSheetMBean implements Serializable {
 
         //Обновляем список типов поиска
         searchList.clear();
-        searchList.addAll(objTypePropBean.getObjTypeProps(selectedObjType));
+        searchList.addAll(bean.getObjTypeProps(selectedObjType));
     }
 
     /**
@@ -241,7 +254,7 @@ public class TechDataSheetMBean implements Serializable {
         }
         nodePath.remove(nodePath.size() - 1);
 
-        log.info("TechDataSheetMBean.reloadAllTree глубина обновления: " + nodePath);
+        log.info("NavigationMBean.reloadAllTree глубина обновления: " + nodePath);
 
         selectedNode = null;
 
@@ -265,6 +278,9 @@ public class TechDataSheetMBean implements Serializable {
 
     public void setSelectedNode(TreeNode selectedNode) {
         this.selectedNode = selectedNode;
+        if (Objects.nonNull(this.selectedNode)) {
+            selectedNodeId = ((TreeNodeModel) this.selectedNode.getData()).getId();
+        }
     }
 
     public String getUser() {
@@ -309,5 +325,13 @@ public class TechDataSheetMBean implements Serializable {
 
     public void setObjTypeList(List<ObjTypeEntity> objTypeList) {
         this.objTypeList = objTypeList;
+    }
+
+    public String getSelectedNodeId() {
+        return selectedNodeId;
+    }
+
+    public void setSelectedNodeId(String selectedNodeId) {
+        this.selectedNodeId = selectedNodeId;
     }
 }
