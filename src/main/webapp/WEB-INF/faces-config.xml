@@ -4,4 +4,7 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
     http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
 
+    <application>
+        <el-resolver>ru.tn.ExtendedBeanELResolver</el-resolver>
+    </application>
 </faces-config>
