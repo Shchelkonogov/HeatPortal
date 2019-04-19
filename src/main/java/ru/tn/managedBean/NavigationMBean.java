@@ -41,7 +41,6 @@ public class NavigationMBean implements Serializable {
     //Переменные нужные для типа объекта
     private long selectedObjType;
     private List<ObjTypeEntity> objTypeList;
-    private static final int DEFAULT_TYPE_ID = 1;
 
     //Переменные нужные для дерева
     private TreeNode root;
@@ -63,11 +62,15 @@ public class NavigationMBean implements Serializable {
     private void init() {
         objTypeList = new ArrayList<>();
         objTypeList.addAll(bean.getTypes());
-        selectedObjType = DEFAULT_TYPE_ID;
+        try {
+            selectedObjType = bean.getDefaultObjectTypeId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         searchList = new ArrayList<>();
         searchList.addAll(bean.getObjTypeProps(selectedObjType));
-        selectedSearch = bean.getDefaultSearchId();
+        selectedSearch = searchList.get(0).getObjTypeId();
 
         root = new DefaultTreeNode(new TreeNodeModel("ROOT"), null);
         addTreeItems(root);
@@ -87,9 +90,8 @@ public class NavigationMBean implements Serializable {
         }
 
         //Загрузка данных для узла
-        log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode + " " + System.currentTimeMillis());
-        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, 1, parentNode);
-        log.info("NavigationMBean.addTreeItems end load data for node: " + parentNode + " " + System.currentTimeMillis());
+        log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode);
+        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, parentNode);
 
         Collections.sort(data);
 

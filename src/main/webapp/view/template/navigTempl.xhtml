@@ -40,6 +40,8 @@
                                  style="width: 100%; margin-right: -100px;">
                     <f:selectItems value="#{navigation.searchList}" var="prop"
                                    itemLabel="#{prop.objTypeValue}" itemValue="#{prop.objTypeId}"/>
+
+                    <p:ajax event="itemSelect"/>
                 </p:selectOneMenu>
             </h:panelGrid>
         </h:form>

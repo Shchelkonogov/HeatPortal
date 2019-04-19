@@ -15,8 +15,8 @@ public class TreeNodeModel implements Serializable, Comparable<Object> {
         this.name = name;
         this.id = id;
 
-        //Если тип начинается на "S", то это узел дерева
-        if (objectType.matches("[S]\\d*")) {
+        //Если тип начинается на "F", то это узел дерева
+        if (objectType.matches("[F]\\d*")) {
             leaf = false;
         }
     }
