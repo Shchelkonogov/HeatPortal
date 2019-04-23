@@ -10,7 +10,7 @@
 </h:head>
 <h:body>
     <ui:composition template="/view/template/portalTempl.xhtml">
-        <ui:param name="bean" value="#{data}"/>
+        <ui:param name="bean" value="#{archiveData}"/>
         <ui:param name="method" value="showName"/>
         <ui:param name="updatePath" value=":dataPanel"/>
 
@@ -19,16 +19,44 @@
         </ui:define>
 
         <ui:define name="right-pane">
-            <p:panel id="dataPanel" header="Архивные данные #{data.headerName}" style="width: 100%; height: 100%;">
-                <p:dataTable id="dataGrid" var="test" value="#{data.gridData}" scrollable="true" scrollHeight="100"
-                             style="height: 100%;" emptyMessage="Не выбран объект">
-                    <p:columns var="column" value="#{data.columns}">
-                        <f:facet name="header">
-                            <h:outputText value="#{column.header}"/>
-                        </f:facet>
-                        <h:outputText value="#{test[column.property]}"/>
-                    </p:columns>
-                </p:dataTable>
+            <p:panel id="dataPanel" header="Архивные данные #{archiveData.headerName}" style="width: 100%; height: 100%;">
+                <p:tabView id="tabView" orientation="bottom" style="height: 100%">
+                    <p:ajax event="tabChange" listener="#{archiveData.onTabChange}"/>
+
+                    <p:tab id="tab1" title="Архивные данные">
+
+                        <h:form>
+                            <p:datePicker id="event" value="#{archiveData.date}">
+                                <p:ajax event="dateSelect" onstart="saveScrollPos()" oncomplete="autoScroll()"
+                                        listener="#{archiveData.onDateSelect}" update=":tabView:dataGrid"/>
+                            </p:datePicker>
+                        </h:form>
+
+                        <h:inputHidden id="scrollPos"/>
+
+                        <div style="height: calc(100% - 37px)">
+                            <p:dataTable id="dataGrid" var="rowData" value="#{archiveData.gridData}" scrollable="true" scrollHeight="100%"
+                                         scrollWidth="800px" frozenColumns="6" emptyMessage="Данных нет">
+                                <p:columns var="column" value="#{archiveData.columns}" width="50" style="white-space: nowrap"
+                                           styleClass="#{rowData[column.propertyColor]}">
+                                    <f:facet name="header">
+                                        <h:outputText value="#{column.header}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{rowData[column.property]}"/>
+                                </p:columns>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
+
+                    <p:tab id="tab2" title="Мнемосхема">
+                        <object type="text/html" data="#{archiveData.mnemoUrl}#{archiveData.object}" width="100%" height="100%"/>
+                    </p:tab>
+
+                    <p:tab id="tab3" title="Карта">
+                        <div id="map" style="height: 100%">
+                        </div>
+                    </p:tab>
+                </p:tabView>
             </p:panel>
         </ui:define>
     </ui:composition>
