@@ -1,6 +1,7 @@
 package ru.tn;
 
 import org.primefaces.application.resource.PrimeResourceHandler;
+import ru.tn.model.ArchiveGridDataValueM;
 
 import javax.el.BeanELResolver;
 import javax.el.ELContext;
@@ -23,9 +24,15 @@ public class ExtendedBeanELResolver extends BeanELResolver {
             String[] properties = propertyString.split("\\.");
 
             Object value = super.getValue(context, base, properties[0]);
-            if (value instanceof String[]) {
+            if (value instanceof ArchiveGridDataValueM[]) {
                 int index = Integer.valueOf(properties[1]);
-                return ((String[]) value).length <= index ? null : ((String[]) value)[index];
+                if (properties.length == 2) {
+                    return ((ArchiveGridDataValueM[]) value).length <= index ? null :
+                            (((ArchiveGridDataValueM[]) value)[index] == null ? null : ((ArchiveGridDataValueM[]) value)[index].getValue());
+                } else {
+                    return ((ArchiveGridDataValueM[]) value).length <= index ? null :
+                            (((ArchiveGridDataValueM[]) value)[index] == null ? null : ((ArchiveGridDataValueM[]) value)[index].getColor());
+                }
             }
         }
 
