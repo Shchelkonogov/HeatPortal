@@ -85,7 +85,7 @@ li.ui-menubar-options {
     width: 220px !important;
 }
 
-#navigPanel_content {
+#navigPanel_content, #dataPanel_content {
     height: calc(100% - 37px);
     padding: 2px;
 }
@@ -104,13 +104,34 @@ li.ui-menubar-options {
 }
 
 .ui-datatable table {
-    table-layout: auto !important;
-}
-
-#dataPanel_content {
-    height: calc(100% - 100px);
+    /*table-layout: auto !important;*/
 }
 
 #dataGrid .ui-datatable-scrollable-body {
-    max-height: calc(100% - 37px) !important;
+    max-height: calc(100% - 150px) !important;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.gray {
+    background-color: gray;
+}
+
+.red {
+    background-color: red;
+}
+
+#tabView .ui-tabs-panels {
+    border-bottom: 1px solid #c8c8c8;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    height: calc(100% - 37px);
+}
+
+#tabView\:tab1, #tabView\:tab2, #tabView\:tab3{
+    height: 100%;
+    padding: 2px;
 }
