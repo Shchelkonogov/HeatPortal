@@ -1,13 +1,15 @@
-package ru.tn.model;
+package ru.tn.model.archiveData;
 
-public class ArchiveGridColumnM {
+public class ColumnModel {
 
     private String header;
     private String property;
+    private String propertyColor;
 
-    public ArchiveGridColumnM(String header, String property) {
+    public ColumnModel(String header, String property, String propertyColor) {
         this.header = header;
         this.property = property;
+        this.propertyColor = propertyColor;
     }
 
     public String getHeader() {
@@ -26,10 +28,20 @@ public class ArchiveGridColumnM {
         this.property = property;
     }
 
+    public String getPropertyColor() {
+        return propertyColor;
+    }
+
+    public void setPropertyColor(String propertyColor) {
+        this.propertyColor = propertyColor;
+    }
+
     @Override
     public String toString() {
-        return "ArchiveGridColumnM{" + "header='" + header + '\'' +
+        return "ColumnModel{" +
+                "header='" + header + '\'' +
                 ", property='" + property + '\'' +
+                ", propertyColor='" + propertyColor + '\'' +
                 '}';
     }
 }
