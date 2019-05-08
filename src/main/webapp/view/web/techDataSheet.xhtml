@@ -13,50 +13,88 @@
         <ui:param name="bean" value="#{archiveData}"/>
         <ui:param name="method" value="showName"/>
         <ui:param name="updatePath" value=":dataPanel"/>
+        <ui:param name="invokeScript" value="loadTableId()"/>
 
         <ui:define name="left-pane">
             <ui:include src="/view/template/navigTempl.xhtml"/>
         </ui:define>
 
         <ui:define name="right-pane">
+            <h:form prependId="false">
+                <p:remoteCommand name="jsCall" onstart="saveScrollPos()"
+                                 action="#{archiveData.updateSelectedRows()}"
+                                 oncomplete="autoScroll(); loadTableId()"
+                                 update=":tabView:dataGrid"/>
+            </h:form>
+
             <p:panel id="dataPanel" header="Архивные данные #{archiveData.headerName}" style="width: 100%; height: 100%;">
-                <p:tabView id="tabView" orientation="bottom" style="height: 100%">
-                    <p:ajax event="tabChange" listener="#{archiveData.onTabChange}"/>
+                <h:form prependId="false" style="height: 100%;">
+                    <p:tabView id="tabView" orientation="bottom" style="height: 100%;">
+                        <p:ajax event="tabChange" listener="#{archiveData.onTabChange}"/>
 
-                    <p:tab id="tab1" title="Архивные данные">
-
-                        <h:form>
+                        <p:tab id="tab1" title="Архивные данные">
                             <p:datePicker id="event" value="#{archiveData.date}">
-                                <p:ajax event="dateSelect" onstart="saveScrollPos()" oncomplete="autoScroll()"
+                                <p:ajax event="dateSelect" onstart="saveScrollPos()" oncomplete="autoScroll(); loadTableId()"
                                         listener="#{archiveData.onDateSelect}" update=":tabView:dataGrid"/>
                             </p:datePicker>
-                        </h:form>
 
-                        <h:inputHidden id="scrollPos"/>
+                            <h:inputHidden id="scrollPos"/>
+                            <p:inputText id="mySelectedColumnId" type="hidden" value="#{archiveData.mySelectedColumnField}">
+                                <p:ajax event="change"/>
+                            </p:inputText>
 
-                        <div style="height: calc(100% - 37px)">
-                            <p:dataTable id="dataGrid" var="rowData" value="#{archiveData.gridData}" scrollable="true" scrollHeight="100%"
-                                         scrollWidth="800px" frozenColumns="6" emptyMessage="Данных нет">
-                                <p:columns var="column" value="#{archiveData.columns}" width="50" style="white-space: nowrap"
-                                           styleClass="#{rowData[column.propertyColor]}">
-                                    <f:facet name="header">
-                                        <h:outputText value="#{column.header}"/>
-                                    </f:facet>
-                                    <h:outputText value="#{rowData[column.property]}"/>
-                                </p:columns>
-                            </p:dataTable>
-                        </div>
-                    </p:tab>
+                            <div style="height: calc(100% - 37px)">
+                                <p:dataTable id="dataGrid" var="rowData" value="#{archiveData.gridData}" scrollable="true" scrollHeight="100%"
+                                             scrollWidth="800px" frozenColumns="7" emptyMessage="Данных нет"
+                                             selection="#{archiveData.selectedRows}" rowKey="#{rowData.paramId}#{rowData.statAgr}">
+                                    <p:column selectionMode="multiple" style="width: 16px; text-align: center;"/>
 
-                    <p:tab id="tab2" title="Мнемосхема">
-                        <object type="text/html" data="#{archiveData.mnemoUrl}#{archiveData.object}" width="100%" height="100%"/>
-                    </p:tab>
+                                    <p:column headerText="Обозн." styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.name}"/>
+                                    </p:column>
+                                    <p:column headerText="Тех. пр." styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.techProc}"/>
+                                    </p:column>
+                                    <p:column headerText="Е.И." styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.si}"/>
+                                    </p:column>
+                                    <p:column headerText="Min" styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.min}"/>
+                                    </p:column>
+                                    <p:column headerText="Max" styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.max}"/>
+                                    </p:column>
+                                    <p:column headerText="Итоги" styleClass="frozenColumnStyle">
+                                        <h:outputText value="#{rowData.result}"/>
+                                    </p:column>
 
-                    <p:tab id="tab3" title="Карта">
-                        <div id="map" style="height: 100%">
-                        </div>
-                    </p:tab>
-                </p:tabView>
+                                    <p:columns var="column" value="#{archiveData.columns}" width="50" style="white-space: nowrap;"
+                                               styleClass="#{rowData[column.propertyColor]}">
+                                        <f:facet name="header">
+                                            <h:outputText value="#{column.header}"/>
+                                        </f:facet>
+                                        <h:outputText value="#{rowData[column.property]}"/>
+                                    </p:columns>
+
+                                    <p:ajax event="rowSelectCheckbox"/>
+                                    <p:ajax event="rowUnselectCheckbox"/>
+                                    <p:ajax event="rowSelect"/>
+                                    <p:ajax event="rowUnselect"/>
+                                    <p:ajax event="toggleSelect"/>
+                                </p:dataTable>
+                            </div>
+                        </p:tab>
+
+                        <p:tab id="tab2" title="Мнемосхема">
+                            <object type="text/html" data="#{archiveData.mnemoUrl}#{archiveData.object}" width="100%" height="100%"/>
+                        </p:tab>
+
+                        <p:tab id="tab3" title="Карта">
+                            <div id="map" style="height: 100%">
+                            </div>
+                        </p:tab>
+                    </p:tabView>
+                </h:form>
             </p:panel>
         </ui:define>
     </ui:composition>

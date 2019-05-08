@@ -8,7 +8,6 @@ import ru.tn.model.archiveData.DataModel;
 import ru.tn.sessionBean.ArchiveData.ArchiveDataSBean;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -17,39 +16,42 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @ManagedBean(name = "archiveData")
 @ViewScoped
 public class ArchiveDataMBean implements Serializable {
 
-    private Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+    private static final Logger LOG = Logger.getLogger(ArchiveDataMBean.class.getName());
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-    private int object;
-
-    @Resource(name = "mnemoUrl")
-    private String mnemoUrl;
 
     @EJB
     private ArchiveDataSBean bean;
 
-    private static final List<ColumnModel> COLUMN_KEYS = Arrays.asList(
-            new ColumnModel("Обозн.", "name", "name"), new ColumnModel("Тех. пр.", "techProc", "techProc"),
-            new ColumnModel("Е.И.", "si", "si"), new ColumnModel("Min", "min", "min"),
-            new ColumnModel("Max", "max", "max"), new ColumnModel("Итоги", "result", "result"));
+    private Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+    private int object;
+
+    private String mySelectedColumnField;
+    private String oldSelectedColumn = "";
+
+    private String mnemoUrl;
 
     private List<ColumnModel> columns = new ArrayList<>();
     private List<DataModel> gridData = new ArrayList<>();
+    private List<DataModel> selectedRows = new ArrayList<>();
 
     private String headerName;
 
+    private boolean mapStatus = false;
+
     @PostConstruct
     private void init() {
-        columns.addAll(COLUMN_KEYS);
+        mnemoUrl = bean.getMnemoUrl();
+
         for (int i = 0; i < 24; i++) {
             columns.add(new ColumnModel((i + 1) + "ч", "data." + i, "data." + i + ".color"));
         }
@@ -68,17 +70,31 @@ public class ArchiveDataMBean implements Serializable {
     }
 
     public void onDateSelect(SelectEvent event) {
-        System.out.println(event.getObject() + " " + date);
-
+        LOG.info("ArchiveDataMBean.onDateSelect select date " + event.getObject());
         gridData = bean.loadData(object, sdf.format(date));
     }
 
-    private boolean mapStatus = false;
+    public void updateSelectedRows() {
+        LOG.info("ArchiveDataMBean.updateSelectedRows click column " + mySelectedColumnField);
+        if (!oldSelectedColumn.equals(mySelectedColumnField)) {
+            for (DataModel data: gridData) {
+                if (!oldSelectedColumn.equals("")) {
+                    if (data.getData()[Integer.parseInt(oldSelectedColumn)].getColor().equals("blue")) {
+                        data.getData()[Integer.parseInt(oldSelectedColumn)].setColor("none");
+                    }
+                }
+                if (data.getData()[Integer.parseInt(mySelectedColumnField)].getColor().equals("none")) {
+                    data.getData()[Integer.parseInt(mySelectedColumnField)].setColor("blue");
+                }
+            }
+            oldSelectedColumn = mySelectedColumnField;
+        }
+    }
 
     public void onTabChange(TabChangeEvent event) {
         if (!mapStatus && event.getTab().getId().equals("tab3")) {
             mapStatus = true;
-            System.out.println("asdasdad");
+            LOG.info("ArchiveDataMBean.onTabChange select tab3");
             PrimeFaces.current().executeScript("initMap('Москва " + bean.getAddress(object) + "')");
         }
     }
@@ -121,5 +137,21 @@ public class ArchiveDataMBean implements Serializable {
 
     public int getObject() {
         return object;
+    }
+
+    public String getMySelectedColumnField() {
+        return mySelectedColumnField;
+    }
+
+    public void setMySelectedColumnField(String mySelectedColumnField) {
+        this.mySelectedColumnField = mySelectedColumnField;
+    }
+
+    public List<DataModel> getSelectedRows() {
+        return selectedRows;
+    }
+
+    public void setSelectedRows(List<DataModel> selectedRows) {
+        this.selectedRows = selectedRows;
     }
 }

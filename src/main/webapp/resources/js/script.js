@@ -37,16 +37,17 @@ paneSep.sdrag(function (el, pageX, startX, pageY, startY, fix) {
 
 // Функция сохраняет позицию scroll
 function saveScrollPos() {
-    var scrollPos = $('#tabView\\:dataGrid .ui-datatable-scrollable-body').scrollTop();
-    // console.log('save position ' + scrollPos);
-    document.getElementById('tabView:scrollPos').value = scrollPos;
+    document.getElementById('tabView:scrollPos').value = document.getElementById('tabView:dataGrid_scrollState').value;
 }
 
 // Функция возвращет сохранненный scroll
 function autoScroll() {
     var scrollPos = document.getElementById('tabView:scrollPos').value;
+    var arr = scrollPos.split(',');
     // console.log('load position ' + scrollPos);
-    $('#tabView\\:dataGrid .ui-datatable-scrollable-body').scrollTop(scrollPos);
+    var attr = $('#tabView\\:dataGrid .ui-datatable-scrollable-body');
+    attr.scrollTop(arr[1]);
+    attr.scrollLeft(arr[0]);
 }
 
 // Функция для отрисовки yandex карт
@@ -60,8 +61,31 @@ function initMap(pAddress) {
     var myGeocoder = ymaps.geocode(pAddress, {results: 1});
     myGeocoder.then(
         function (res) {
-            myMap.setCenter(res.geoObjects.get(0).geometry.getCoordinates(), 18)
+            myMap.setCenter(res.geoObjects.get(0).geometry.getCoordinates(), 18);
             myMap.geoObjects.add(res.geoObjects)
         }
     )
 }
+
+// Выставляем нужный id и устанавливаем высоту
+function loadTableId() {
+    document.getElementById("tabView:dataGrid_scrollableTbody").parentElement.setAttribute("id", "dataGridForSelect");
+    document.getElementById("tabView:dataGrid_scrollableThead").children[0].setAttribute("style", "height: 40px");
+}
+
+jQuery(window).on('load', function() {
+    loadTableId();
+});
+
+//bind every click on any td in the table
+jQuery(document).delegate("#dataGridForSelect td", "click", function (event) {
+    //get index of clicked row
+    var columnNumber = jQuery(this).index();
+    // console.log(columnNumber);
+    var attr = jQuery("#tabView\\:mySelectedColumnId");
+    //set value in the inputText
+    attr.val(columnNumber);
+    //this will trigger the ajax listener
+    attr.change();
+    jsCall();
+});
