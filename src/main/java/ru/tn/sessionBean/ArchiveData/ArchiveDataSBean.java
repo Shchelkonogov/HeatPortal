@@ -39,6 +39,9 @@ public class ArchiveDataSBean {
     @EJB
     private MinMax bean;
 
+    @Resource(name = "mnemoUrl")
+    private String mnemoUrl;
+
     @Resource
     private ManagedExecutorService mes;
 
@@ -128,5 +131,9 @@ public class ArchiveDataSBean {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String getMnemoUrl() {
+        return mnemoUrl;
     }
 }
