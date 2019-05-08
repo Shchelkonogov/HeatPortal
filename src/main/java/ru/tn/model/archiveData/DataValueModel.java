@@ -5,9 +5,6 @@ public class DataValueModel {
     private String value;
     private String color;
 
-    public DataValueModel() {
-    }
-
     public DataValueModel(String value, String color) {
         this.value = value;
         this.color = color;
@@ -23,6 +20,10 @@ public class DataValueModel {
 
     public String getColor() {
         return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @Override
