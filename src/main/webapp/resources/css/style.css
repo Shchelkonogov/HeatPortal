@@ -112,15 +112,35 @@ li.ui-menubar-options {
 }
 
 .yellow {
+    height: 37.27px;
+    color: black;
     background-color: yellow;
 }
 
 .gray {
+    height: 37.27px;
     background-color: gray;
 }
 
 .red {
+    height: 37.27px;
     background-color: red;
+}
+
+.blue {
+    height: 37.27px;
+    color: white;
+    background-color: #007ad9;
+}
+
+.none {
+    height: 37.27px;
+}
+
+.frozenColumnStyle {
+    width: 50px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 #tabView .ui-tabs-panels {
@@ -131,7 +151,7 @@ li.ui-menubar-options {
     height: calc(100% - 37px);
 }
 
-#tabView\:tab1, #tabView\:tab2, #tabView\:tab3{
+#tabView\:tab1, #tabView\:tab2, #tabView\:tab3 {
     height: 100%;
     padding: 2px;
 }
