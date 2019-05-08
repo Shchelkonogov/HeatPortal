@@ -180,6 +180,10 @@ public class NavigationMBean implements Serializable {
                 FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
                         .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
                 PrimeFaces.current().ajax().update((String) faceletContext.getAttribute("updatePath"));
+
+                if (!faceletContext.getAttribute("invokeScript").equals("")) {
+                    PrimeFaces.current().executeScript((String) faceletContext.getAttribute("invokeScript"));
+                }
             } else {
                 if (selectedNode.isExpanded()) {
                     setExpandedNode(false, selectedNode);
