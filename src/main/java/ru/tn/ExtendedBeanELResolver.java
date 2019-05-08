@@ -31,7 +31,7 @@ public class ExtendedBeanELResolver extends BeanELResolver {
                             (((DataValueModel[]) value)[index] == null ? null : ((DataValueModel[]) value)[index].getValue());
                 } else {
                     return ((DataValueModel[]) value).length <= index ? null :
-                            (((DataValueModel[]) value)[index] == null ? null : ((DataValueModel[]) value)[index].getColor());
+                            (((DataValueModel[]) value)[index] == null ? "none" : ((DataValueModel[]) value)[index].getColor());
                 }
             }
         }
