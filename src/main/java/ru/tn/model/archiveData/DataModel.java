@@ -22,15 +22,8 @@ public class DataModel {
 
     private static final int DATA_SIZE = 31;
 
-    public DataModel() {
-        for (int i = 0; i < DATA_SIZE; i++) {
-            data[i] = new DataValueModel();
-        }
-    }
-
     public DataModel(int paramId, int statAgr, boolean analog, String name, String techProc,
                      String si, String calculateType) {
-//        this();
         this.paramId = paramId;
         this.statAgr = statAgr;
         this.analog = analog;
@@ -100,24 +93,12 @@ public class DataModel {
         return paramId;
     }
 
-    public void setParamId(int paramId) {
-        this.paramId = paramId;
-    }
-
     public int getStatAgr() {
         return statAgr;
     }
 
-    public void setStatAgr(int statAgr) {
-        this.statAgr = statAgr;
-    }
-
     public boolean isAnalog() {
         return analog;
-    }
-
-    public void setAnalog(boolean analog) {
-        this.analog = analog;
     }
 
     public void calcResult() {
@@ -125,20 +106,20 @@ public class DataModel {
         BigDecimal tempValue;
         int count = 0;
 
-        for (int i = 0; i < data.length; i++) {
-            if ((data[i] != null) && (data[i].getValue() != null)) {
+        for (DataValueModel datum: data) {
+            if ((datum != null) && (datum.getValue() != null)) {
                 if (analog) {
                     try {
-                        tempValue = new BigDecimal(data[i].getValue().replaceAll(",", "."));
+                        tempValue = new BigDecimal(datum.getValue().replaceAll(",", "."));
                         sum = sum.add(tempValue);
                         count++;
-                        data[i].setValue(tempValue.setScale(2, RoundingMode.HALF_EVEN)
+                        datum.setValue(tempValue.setScale(2, RoundingMode.HALF_EVEN)
                                 .stripTrailingZeros().toPlainString());
-                    } catch(NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                     }
                 } else {
-                    if (data[i].getValue().startsWith("~")) {
-                        sum = sum.add(new BigDecimal(data[i].getValue().substring(1)));
+                    if (datum.getValue().startsWith("~")) {
+                        sum = sum.add(new BigDecimal(datum.getValue().substring(1)));
                         count++;
                     }
                 }
