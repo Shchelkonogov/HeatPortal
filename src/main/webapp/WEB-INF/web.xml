@@ -62,6 +62,14 @@
         <!--<param-name>primefaces.FONT_AWESOME</param-name>-->
         <!--<param-value>true</param-value>-->
     <!--</context-param>-->
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>server</param-value>
+    </context-param>
 
     <mime-mapping>
         <extension>ttf</extension>
@@ -87,11 +95,6 @@
         <!--<extension>svg</extension>-->
         <!--<mime-type>image/svg+xml</mime-type>-->
     <!--</mime-mapping>-->
-
-    <context-param>
-        <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Development</param-value>
-    </context-param>
     
     <welcome-file-list>
         <welcome-file>/view/template/portalTempl.xhtml</welcome-file>
