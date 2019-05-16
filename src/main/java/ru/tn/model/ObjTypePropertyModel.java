@@ -1,6 +1,8 @@
 package ru.tn.model;
 
-public class ObjTypePropertyModel {
+import java.io.Serializable;
+
+public class ObjTypePropertyModel implements Serializable {
 
     private String objTypeValue;
     private long objTypeId;
