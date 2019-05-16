@@ -1,6 +1,8 @@
 package ru.tn.model.archiveData;
 
-public class ColumnModel {
+import java.io.Serializable;
+
+public class ColumnModel implements Serializable {
 
     private String header;
     private String property;
