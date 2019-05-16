@@ -1,6 +1,7 @@
 package ru.tn.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
@@ -9,7 +10,7 @@ import java.util.Objects;
         @NamedQuery(name = "ObjTypeEntity.getAllTypes",
                 query = "select new ObjTypeEntity(o.objTypeName, o.objTypeId) from ObjTypeEntity o order by o.objTypeName")
 })
-public class ObjTypeEntity {
+public class ObjTypeEntity implements Serializable {
 
     private String objTypeName;
     private String objTypeChar;
