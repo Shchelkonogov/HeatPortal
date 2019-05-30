@@ -69,8 +69,11 @@ function initMap(pAddress) {
 
 // Выставляем нужный id и устанавливаем высоту
 function loadTableId() {
-    document.getElementById("tabView:dataGrid_scrollableTbody").parentElement.setAttribute("id", "dataGridForSelect");
-    document.getElementById("tabView:dataGrid_scrollableThead").children[0].setAttribute("style", "height: 40px");
+    var item = document.getElementById("tabView:dataGrid_scrollableTbody");
+    if (item != null) {
+        document.getElementById("tabView:dataGrid_scrollableTbody").parentElement.setAttribute("id", "dataGridForSelect");
+        document.getElementById("tabView:dataGrid_scrollableThead").children[0].setAttribute("style", "height: 40px");
+    }
 }
 
 jQuery(window).on('load', function() {
