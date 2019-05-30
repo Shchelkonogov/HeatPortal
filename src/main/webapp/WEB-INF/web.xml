@@ -13,7 +13,12 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
 
+    <session-config>
+        <session-timeout>10</session-timeout>
+    </session-config>
+
     <resource-ref>
+        <description>DB connection</description>
         <res-ref-name>jdbc/dataSource</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
