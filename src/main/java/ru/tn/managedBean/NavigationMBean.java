@@ -10,6 +10,7 @@ import ru.tn.entity.ObjTypeEntity;
 import ru.tn.model.ObjTypePropertyModel;
 import ru.tn.model.TreeNodeModel;
 import ru.tn.sessionBean.NavigationSBean;
+import ru.tn.util.AlphaNumComparator;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -19,10 +20,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.view.facelets.FaceletContext;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,7 +91,7 @@ public class NavigationMBean implements Serializable {
         log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode);
         List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, parentNode);
 
-        Collections.sort(data);
+        data.sort(new AlphaNumComparator());
 
         for (TreeNodeModel item: data) {
             if (item.isLeaf()) {

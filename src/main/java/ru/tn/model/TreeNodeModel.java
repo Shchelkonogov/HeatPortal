@@ -2,7 +2,7 @@ package ru.tn.model;
 
 import java.io.Serializable;
 
-public class TreeNodeModel implements Serializable, Comparable<Object> {
+public class TreeNodeModel implements Serializable {
 
     private String name, id;
     private boolean leaf = true;
@@ -36,18 +36,5 @@ public class TreeNodeModel implements Serializable, Comparable<Object> {
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        TreeNodeModel item = (TreeNodeModel) o;
-        if (!this.leaf && item.leaf) {
-            return -1;
-        } else {
-            if (this.leaf && !item.leaf) {
-                return 1;
-            }
-        }
-        return this.name.compareTo(item.name);
     }
 }
