@@ -8,9 +8,6 @@
             <!--<property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>-->
             <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform" />
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
-            <!--Настройки в момент разработки. Урать когда выложу в продакшен и убрать ojdbc библиотеку-->
-            <property name="hibernate.connection.url" value="jdbc:oracle:thin:@//172.16.2.156:1521/taf_nsi"/>
-            <property name="hibernate.connection.driver_class" value="oracle.jdbc.OracleDriver"/>
         </properties>
     </persistence-unit>
 </persistence>
