@@ -228,6 +228,7 @@ public class NavigationMBean implements Serializable {
         //Обновляем список типов поиска
         searchList.clear();
         searchList.addAll(bean.getObjTypeProps(selectedObjType));
+        selectedSearch = searchList.get(0).getObjTypeId();
     }
 
     /**
