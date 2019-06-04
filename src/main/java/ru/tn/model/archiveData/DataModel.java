@@ -1,13 +1,16 @@
 package ru.tn.model.archiveData;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 
-public class DataModel {
+public class DataModel implements Serializable {
 
     private int paramId;
     private int statAgr;
+
+    private int paramTypeId;
 
     private boolean analog;
     private String calculateType;
@@ -15,15 +18,22 @@ public class DataModel {
     private String name;
     private String techProc;
     private String si;
-    private String min;
-    private String max;
+    private String min = "-";
+    private String max = "-";
     private String result = "-";
-    private DataValueModel[] data = new DataValueModel[DATA_SIZE];
+    private DataValueModel[] data;
 
-    private static final int DATA_SIZE = 31;
+    public DataModel(boolean analog, String calculateType, String name, String techProc, String si, int paramTypeId) {
+        this.analog = analog;
+        this.calculateType = calculateType;
+        this.name = name;
+        this.techProc = techProc;
+        this.si = si;
+        this.paramTypeId = paramTypeId;
+    }
 
     public DataModel(int paramId, int statAgr, boolean analog, String name, String techProc,
-                     String si, String calculateType) {
+                     String si, String calculateType, int paramTypeId) {
         this.paramId = paramId;
         this.statAgr = statAgr;
         this.analog = analog;
@@ -31,6 +41,7 @@ public class DataModel {
         this.techProc = techProc;
         this.si = si;
         this.calculateType = calculateType;
+        this.paramTypeId = paramTypeId;
     }
 
     public String getName() {
@@ -99,6 +110,10 @@ public class DataModel {
 
     public boolean isAnalog() {
         return analog;
+    }
+
+    public int getParamTypeId() {
+        return paramTypeId;
     }
 
     public void calcResult() {
