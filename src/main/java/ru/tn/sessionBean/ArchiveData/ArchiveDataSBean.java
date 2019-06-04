@@ -36,9 +36,6 @@ public class ArchiveDataSBean {
     @Resource(name = "jdbc/dataSource")
     private DataSource ds;
 
-    @EJB
-    private MinMax bean;
-
     @Resource(name = "mnemoUrl")
     private String mnemoUrl;
 
@@ -83,30 +80,46 @@ public class ArchiveDataSBean {
                 data.add(new DataModel(res.getInt("par_id"), res.getInt("stat_aggr"),
                         res.getString("categ").equals("A"), res.getString("par_memo"),
                         res.getString("proc_name"), res.getString("measure_name"),
-                        res.getString("dif_int")));
+                        res.getString("dif_int"), res.getInt("param_type_id")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        Future<Void> handle = bean.loadMinMax(data, objectId, 1, date);
-
+        //Старт потоков загрузки данных и min/max
         List<Future<DataValueModel[]>> dataList = new ArrayList<>();
         for (DataModel model : data) {
             ParamDataLoadThread task = new ParamDataLoadThread(model.getParamId(), model.getStatAgr(),
-                    objectId, date, System.currentTimeMillis());
+                    objectId, date, System.currentTimeMillis(), model.isAnalog());
             dataList.add(mes.submit(task));
         }
 
-        try {
-            handle.get();
+        //Старт потока загрузки температуры наружного воздуха
+        Future<DataValueModel[]> outTemp = mes.submit(new OutdoorTemperatureThread(objectId, date));
 
+        try {
+            //Обрабатываем результаты данных параметров и считаем итоги
             for (int i = 0; i < dataList.size(); i++) {
                 data.get(i).setData(dataList.get(i).get());
                 data.get(i).calcResult();
             }
+
+            //Добавляем параметр температура наружного воздуха и кладем туда данные
+            data.add(0, new DataModel(true, "D", "Тгмц", "-", "°C", 1));
+            data.get(0).setMin("-");
+            data.get(0).setMax("-");
+            data.get(0).setData(outTemp.get());
+            data.get(0).calcResult();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        }
+
+        //Выставляем min/max значения для отображения (берем первую колонку с данными)
+        for (DataModel model: data) {
+            if (model.getData()[0] != null) {
+                model.setMin(model.getData()[0].getMin());
+                model.setMax(model.getData()[0].getMax());
+            }
         }
 
         LOG.info("ArchiveDataSBean.loadData " + (System.currentTimeMillis() - timer) + " " + data);
