@@ -1,7 +1,6 @@
 html, body {
     height: calc(100% - 25px);
     margin: 1px;
-
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -28,7 +27,7 @@ li.ui-menubar-options {
 
 .top {
     margin-bottom: 5px;
-    width:100%;
+    width: 100%;
     border-radius: 5px;
     border: 1px solid black;
 }
@@ -39,27 +38,51 @@ li.ui-menubar-options {
     overflow: hidden;
 }
 
-.left-pane {
-    width:25%;
+.panes-container,
+.left-pane,
+.right-pane {
+    margin: 0 0 5px 0;
+    padding: 0;
+    height: 100%;
 }
 
-.panes-separator {
-    width: 10px;
-    position: relative;
-    cursor: col-resize;
+.left-pane {
+    flex: 0 0 300px;
+    margin-right: 5px;
 }
 
 .right-pane {
     flex: auto;
 }
 
-.panes-container,
-.panes-separator,
-.left-pane,
-.right-pane {
-    margin: 0 0 5px 0;
+.collapseButton {
+    left: 289px;
+    top: 60px;
+    width: 16px;
     padding: 0;
-    height: 100%;
+    margin: 0;
+    border-radius: 25px 0 0 25px;
+    background-color: #fff;
+    cursor: pointer;
+    position: absolute;
+    border: 0;
+    box-shadow: -7px 0 7px -4px rgba(0,0,0,.5);
+    outline: none;
+}
+
+.collapseButtonHidden {
+    left: 8px;
+    top: 60px;
+    width: 5px;
+    height: 20px;
+    padding: 0;
+    margin: 0;
+    border-radius: 0 25px 25px 0;
+    background-color: #000;
+    cursor: pointer;
+    position: absolute;
+    border: 0;
+    outline: none;
 }
 
 .box {
@@ -69,29 +92,15 @@ li.ui-menubar-options {
     height: 100%;
     /* Use box-sizing so that element's outerwidth will match width property */
     box-sizing: border-box;
-    /* Allow box to grow and shrink, and ensure they are all equally sized */
-    flex: 1 1 auto;
 }
 
 .fieldwrapper {
     white-space: nowrap;
 }
 
-.col {
-    width: 100%;
-}
-
-#navig\:objType_panel {
-    width: 220px !important;
-}
-
 #navigPanel_content, #dataPanel_content {
     height: calc(100% - 37px);
     padding: 2px;
-}
-
-#navig\:search_panel {
-    width: 220px !important;
 }
 
 .tree {
@@ -101,6 +110,10 @@ li.ui-menubar-options {
     /* Allow box to grow and shrink, and ensure they are all equally sized */
     flex: 1 1 auto;
     overflow: auto;
+}
+
+.ui-tree-container {
+    overflow: unset !important;
 }
 
 .ui-datatable table {

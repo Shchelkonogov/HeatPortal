@@ -8,7 +8,6 @@
       xmlns:p="http://primefaces.org/ui">
 <h:head>
     <h:outputStylesheet name="style.css" library="css"/>
-    <script type="text/javascript" src="https://cdn.rawgit.com/lingtalfi/simpledrag/master/simpledrag.js"></script>
     <script type="text/javascript" src="http://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
     <h:outputScript name="script.js" library="js" target="body"/>
 </h:head>
@@ -34,14 +33,12 @@
 
         <div class="panes-container">
             <div class="left-pane" id="left-pane">
-                <div class="box">
+                <div class="box" style="width: 300px;">
                     <ui:insert name="left-pane">
                         <ui:include src="/view/template/contentTempl.xhtml"/>
                     </ui:insert>
                 </div>
             </div>
-
-            <div class="panes-separator" id="panes-separator"></div>
 
             <div class="right-pane" id="right-pane">
                 <div class="box">
@@ -50,6 +47,11 @@
                     </ui:insert>
                 </div>
             </div>
+
+            <button id="collapseButton" class="collapseButton"
+                    title="Скрыть панель навигации" onclick="collapseButtonClick()">
+                <i id="collapseButtonIcon" class="pi pi-angle-left" style="margin-top: 2px;"/>
+            </button>
         </div>
     </div>
 </h:body>

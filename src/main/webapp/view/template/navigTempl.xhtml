@@ -6,10 +6,10 @@
     <p:panel id="navigPanel" header="Навигация" style="width: 100%; height: 100%;">
 
         <h:form id="navig" style="height: calc(100% - 43px)">
-            <h:panelGrid columns="2" styleClass="fieldwrapper" columnClasses=",col">
+            <h:panelGrid columns="2" styleClass="fieldwrapper">
                 <p:outputLabel for="objType" value="Тип объекта:"/>
                 <p:selectOneMenu id="objType" value="#{navigation.selectedObjType}" dynamic="true"
-                                 style="width: 100%; margin-right: -100px;">
+                                 style="width: 202px">
                     <f:selectItems value="#{navigation.objTypeList}" var="type"
                                    itemLabel="#{type.objTypeName}" itemValue="#{type.objTypeId}"/>
 
@@ -20,7 +20,7 @@
 
             <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.root}" var="node" dynamic="true"
                     selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
-                    styleClass="tree" style="width: 100%">
+                    styleClass="tree" style="width: 100%; padding: 0;">
                 <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
                     <h:outputText value="#{node.name}"/>
                 </p:treeNode>
@@ -34,10 +34,10 @@
                 <p:ajax event="collapse" listener="#{navigation.onNodeCollapse}"/>
             </p:tree>
 
-            <h:panelGrid columns="2" styleClass="fieldwrapper" columnClasses=",col" style="margin-top: 3px">
+            <h:panelGrid columns="2" styleClass="fieldwrapper" style="margin-top: 3px">
                 <p:outputLabel for="search" value="Тип поиска:"/>
                 <p:selectOneMenu id="search" value="#{navigation.selectedSearch}" dynamic="true"
-                                 style="width: 100%; margin-right: -100px;">
+                                 style="width: 210px">
                     <f:selectItems value="#{navigation.searchList}" var="prop"
                                    itemLabel="#{prop.objTypeValue}" itemValue="#{prop.objTypeId}"/>
 
@@ -47,8 +47,8 @@
         </h:form>
 
         <h:form id="searchButton">
-            <h:panelGrid columns="2" columnClasses="col" style="margin-top: 5px">
-                <p:inputText  value="#{navigation.searchText}" style="width: 100%"/>
+            <h:panelGrid columns="2" style="margin-top: 5px">
+                <p:inputText  value="#{navigation.searchText}" style="width: 171px"/>
                 <p:commandButton value="Перестроить" action="#{navigation.updateSearch()}"
                                  update=":navig:orgTree"/>
             </h:panelGrid>
