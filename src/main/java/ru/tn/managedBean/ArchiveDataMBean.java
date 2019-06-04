@@ -64,6 +64,7 @@ public class ArchiveDataMBean implements Serializable {
             object = Integer.parseInt(value.substring(1));
 
             gridData = bean.loadData(object, sdf.format(date));
+            selectColumn(0);
 
             mapStatus = false;
         }
@@ -72,6 +73,7 @@ public class ArchiveDataMBean implements Serializable {
     public void onDateSelect(SelectEvent event) {
         LOG.info("ArchiveDataMBean.onDateSelect select date " + event.getObject());
         gridData = bean.loadData(object, sdf.format(date));
+        selectColumn(0);
     }
 
     public void updateSelectedRows() {
@@ -86,9 +88,21 @@ public class ArchiveDataMBean implements Serializable {
                 if (data.getData()[Integer.parseInt(mySelectedColumnField)].getColor().equals("none")) {
                     data.getData()[Integer.parseInt(mySelectedColumnField)].setColor("blue");
                 }
+                data.setMin(data.getData()[Integer.parseInt(mySelectedColumnField)].getMin());
+                data.setMax(data.getData()[Integer.parseInt(mySelectedColumnField)].getMax());
             }
+
             oldSelectedColumn = mySelectedColumnField;
         }
+    }
+
+    private void selectColumn(int index) {
+        for (DataModel data: gridData) {
+            if ((data.getData()[index] != null) && data.getData()[index].getColor().equals("none")) {
+                data.getData()[index].setColor("blue");
+            }
+        }
+        oldSelectedColumn = String.valueOf(index);
     }
 
     public void onTabChange(TabChangeEvent event) {
