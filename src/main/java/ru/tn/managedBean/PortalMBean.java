@@ -13,6 +13,7 @@ public class PortalMBean implements Serializable {
     }
 
     public void logout() {
+        //TODO Похоже так и не работает защита от потери сессии ПРОВЕРИТЬ
         System.out.println(FacesContext.getCurrentInstance().getExternalContext().getUserPrincipal().getName());
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
     }
