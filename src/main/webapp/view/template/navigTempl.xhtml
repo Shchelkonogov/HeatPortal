@@ -14,25 +14,49 @@
                                    itemLabel="#{type.objTypeName}" itemValue="#{type.objTypeId}"/>
 
                     <p:ajax event="itemSelect" listener="#{navigation.changeObjTypeListener}"
-                            update=":navig:search :navig:orgTree"/>
+                            update=":navig:search :navig:navigateTab"/>
                 </p:selectOneMenu>
             </h:panelGrid>
 
-            <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.root}" var="node" dynamic="true"
-                    selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
-                    styleClass="tree" style="width: 100%; padding: 0;">
-                <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
-                    <h:outputText value="#{node.name}"/>
-                </p:treeNode>
+            <p:tabView id="navigateTab" prependId="false" style="height: calc(100% - 89px); margin-bottom: 10px">
+                <p:tab id="org" title="Предприятие">
+                    <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.root['org']}" var="node" dynamic="true"
+                            selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
+                            styleClass="tree" style="width: 100%; padding: 0;">
+                        <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
+                            <h:outputText value="#{node.name}"/>
+                        </p:treeNode>
 
-                <p:treeNode type="leaf" icon="pi pi-file">
-                    <h:outputText value="#{node.name}"/>
-                </p:treeNode>
+                        <p:treeNode type="leaf" icon="pi pi-file">
+                            <h:outputText value="#{node.name}"/>
+                        </p:treeNode>
 
-                <p:ajax event="select" listener="#{navigation.onNodeSelect}"/>
-                <p:ajax event="expand" listener="#{navigation.onNodeExpand}"/>
-                <p:ajax event="collapse" listener="#{navigation.onNodeCollapse}"/>
-            </p:tree>
+                        <p:ajax event="select" listener="#{navigation.onNodeSelect}"/>
+                        <p:ajax event="expand" listener="#{navigation.onNodeExpand}"/>
+                        <p:ajax event="collapse" listener="#{navigation.onNodeCollapse}"/>
+                    </p:tree>
+                </p:tab>
+
+                <p:tab id="ter" title="Территория">
+                    <p:tree id="terTree" widgetVar="terTreeWidget" value="#{navigation.root['ter']}" var="node" dynamic="true"
+                            selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
+                            styleClass="tree" style="width: 100%; padding: 0;">
+                        <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
+                            <h:outputText value="#{node.name}"/>
+                        </p:treeNode>
+
+                        <p:treeNode type="leaf" icon="pi pi-file">
+                            <h:outputText value="#{node.name}"/>
+                        </p:treeNode>
+
+                        <p:ajax event="select" listener="#{navigation.onNodeSelect}"/>
+                        <p:ajax event="expand" listener="#{navigation.onNodeExpand}"/>
+                        <p:ajax event="collapse" listener="#{navigation.onNodeCollapse}"/>
+                    </p:tree>
+                </p:tab>
+
+                <p:ajax event="tabChange" listener="#{navigation.onTabChange}"/>
+            </p:tabView>
 
             <h:panelGrid columns="2" styleClass="fieldwrapper" style="margin-top: 3px">
                 <p:outputLabel for="search" value="Тип поиска:"/>
@@ -50,7 +74,7 @@
             <h:panelGrid columns="2" style="margin-top: 5px">
                 <p:inputText  value="#{navigation.searchText}" style="width: 171px"/>
                 <p:commandButton value="Перестроить" action="#{navigation.updateSearch()}"
-                                 update=":navig:orgTree"/>
+                                 update=":navig:navigateTab"/>
             </h:panelGrid>
         </h:form>
 

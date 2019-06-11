@@ -29,11 +29,14 @@ public class NavigationSBean {
 
     private static final Logger LOG = Logger.getLogger(NavigationSBean.class.getName());
 
-    private static final String SQL = "select name, id, my_icon " +
+    private static final String SQL_ORG = "select name, id, my_icon " +
             "from (select * from table(DSP_0032T.sel_struct_filter2_1_obh(?, ?, ?, ?))) " +
             "where level = nvl(2, level) " +
-            "connect by prior id = parent start with id = ? " +
-            "order siblings by order_by_struct(name, my_type)";
+            "connect by prior id = parent start with id = ?";
+    private static final String SQL_TER = "select name, id, my_icon " +
+            "from (select * from table(DSP_0032T.sel_addr_filter2_1_obh(?, ?, ?, ?))) " +
+            "where level = nvl(2, level) " +
+            "connect by prior id = parent start with id = ?";
 
     private static final String SQL_OBJECT_TYPE_PROPERTY = "select obj_prop_id, obj_prop_name " +
             "from table(dsp_0032t.get_obj_type_props(?))";
@@ -66,10 +69,11 @@ public class NavigationSBean {
      * @param searchText текст поиска
      * @param userName имя пользователя от которого строится дерево
      * @param parentNode id элемента родителя дерева
+     * @param treeType тип дерева (ter или org)
      * @return массив с элементами ветки
      */
     public List<TreeNodeModel> getTreeNode(long objectTypeId, long searchTypeId, String searchText,
-                                           String userName, String parentNode) {
+                                           String userName, String parentNode, String treeType) {
         LOG.info("NavigationSBean.getTreeNode " + objectTypeId + " " + searchTypeId + " " + searchText +
                 " " + userName + " " + parentNode);
         int key = (objectTypeId + searchTypeId + searchText + userName + parentNode).hashCode();
@@ -80,7 +84,9 @@ public class NavigationSBean {
 
         List<TreeNodeModel> result = new ArrayList<>();
         try(Connection connect = ds.getConnection();
-            PreparedStatement stm = connect.prepareStatement(SQL)) {
+            PreparedStatement stm = connect.prepareStatement(treeType.equals("org") ? SQL_ORG : SQL_TER)) {
+            stm.setFetchSize(1000);
+
             stm.setLong(1, objectTypeId);
             stm.setLong(2, searchTypeId);
             stm.setString(3, searchText);

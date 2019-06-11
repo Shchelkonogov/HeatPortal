@@ -104,7 +104,7 @@ li.ui-menubar-options {
 }
 
 .tree {
-    height:calc(100% - 83px);
+    height: 100%;
     /* Use box-sizing so that element's outerwidth will match width property */
     box-sizing: border-box;
     /* Allow box to grow and shrink, and ensure they are all equally sized */
@@ -168,4 +168,16 @@ li.ui-menubar-options {
 #tabView\:tab1, #tabView\:tab2, #tabView\:tab3 {
     height: 100%;
     padding: 2px;
+}
+
+#navig\:navigateTab .ui-tabs-panels {
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    height: calc(100% - 30px);
+}
+
+#navig\:ter, #navig\:org {
+    height: 100%;
+    padding: 1px 0 0;
 }

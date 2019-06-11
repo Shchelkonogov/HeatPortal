@@ -4,6 +4,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.NodeCollapseEvent;
 import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.event.NodeSelectEvent;
+import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
 import ru.tn.entity.ObjTypeEntity;
@@ -36,20 +37,27 @@ public class NavigationMBean implements Serializable {
     @EJB
     private NavigationSBean bean;
 
+    //Переменные для панели закладок
+    private String selectedTab;
+    private static final String[] DEFAULT_TAB_ID = {"org", "ter"};
+
     //Переменные нужные для типа объекта
     private long selectedObjType;
     private List<ObjTypeEntity> objTypeList;
 
     //Переменные нужные для дерева
-    private TreeNode root;
+    private Map<String, TreeNode> root = new HashMap<>();
     private String selectedNodeId;
-    private TreeNode selectedNode;
-    private TreeNode oldSelectNode;
+    private Map<String, TreeNode> selectedNode = new HashMap<>();
+    private Map<String, TreeNode> oldSelectNode = new HashMap<>();
     private long timeOldSelectNode;
-    private String parentNode = DEFAULT_PARENT_NODE;
-    private List<TreeNode> nodePath = new ArrayList<>();
+    private Map<String, String> parentNode = new HashMap<>();
+    private Map<String, List<TreeNode>> nodePath = new HashMap<>();
     private static final String DEFAULT_NODE_NAME = "NODE";
-    private static final String DEFAULT_PARENT_NODE = "S545";
+    private static final Map<String, String> DEFAULT_PARENT_NODE = new HashMap<String, String>() {{
+        put(DEFAULT_TAB_ID[0], "S545");
+        put(DEFAULT_TAB_ID[1], "G1");
+    }};
 
     //Переменные нужные для поиска
     private long selectedSearch;
@@ -70,8 +78,15 @@ public class NavigationMBean implements Serializable {
         searchList.addAll(bean.getObjTypeProps(selectedObjType));
         selectedSearch = searchList.get(0).getObjTypeId();
 
-        root = new DefaultTreeNode(new TreeNodeModel("ROOT"), null);
-        addTreeItems(root);
+        for (String item: DEFAULT_TAB_ID) {
+            root.put(item, new DefaultTreeNode(new TreeNodeModel("ROOT"), null));
+            parentNode.put(item, DEFAULT_PARENT_NODE.get(item));
+            nodePath.put(item, new ArrayList<>());
+            selectedTab = item;
+            addTreeItems(root.get(item));
+        }
+
+        selectedTab = DEFAULT_TAB_ID[0];
     }
 
     /**
@@ -80,7 +95,7 @@ public class NavigationMBean implements Serializable {
      */
     private void addTreeItems(TreeNode rootNode) {
         //Проверка надо ли перестраивать узел
-        if ((rootNode == root) || ((rootNode.getChildCount() == 1)
+        if ((rootNode == root.get(selectedTab)) || ((rootNode.getChildCount() == 1)
                 && (((TreeNodeModel) rootNode.getChildren().get(0).getData()).getName().equals(DEFAULT_NODE_NAME)))) {
             rootNode.getChildren().clear();
         } else {
@@ -88,8 +103,8 @@ public class NavigationMBean implements Serializable {
         }
 
         //Загрузка данных для узла
-        log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode);
-        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, parentNode);
+        log.info("NavigationMBean.addTreeItems start load data for node: " + parentNode.get(selectedTab));
+        List<TreeNodeModel> data = bean.getTreeNode(selectedObjType, selectedSearch, searchText, user, parentNode.get(selectedTab), selectedTab);
 
         data.sort(new AlphaNumComparator());
 
@@ -102,17 +117,17 @@ public class NavigationMBean implements Serializable {
 
                 //В случае если заполнен nodePath (используется для раскрытии множества веток)
                 //открывает ветку и вызывает загрузку данных для него
-                if (!nodePath.isEmpty()
-                        && (item.getId().equals(((TreeNodeModel) nodePath.get(nodePath.size() - 1).getData()).getId()))) {
-                    nodePath.remove(nodePath.size() - 1);
-                    parentNode = item.getId();
+                if (!nodePath.get(selectedTab).isEmpty()
+                        && (item.getId().equals(((TreeNodeModel) nodePath.get(selectedTab).get(nodePath.get(selectedTab).size() - 1).getData()).getId()))) {
+                    nodePath.get(selectedTab).remove(nodePath.get(selectedTab).size() - 1);
+                    parentNode.put(selectedTab, item.getId());
                     node.setExpanded(true);
                     addTreeItems(node);
                 }
             }
         }
 
-        nodePath.clear();
+        nodePath.get(selectedTab).clear();
     }
 
     /**
@@ -123,9 +138,9 @@ public class NavigationMBean implements Serializable {
         log.log(Level.INFO, "NavigationMBean.onNodeExpand load start");
 
         log.info("NavigationMBean.onNodeExpand expand: " + event.getTreeNode());
-        updateSelect(selectedNode, event.getTreeNode());
+        updateSelect(selectedNode.get(selectedTab), event.getTreeNode());
 
-        parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
+        parentNode.put(selectedTab, ((TreeNodeModel) event.getTreeNode().getData()).getId());
         addTreeItems(event.getTreeNode());
 
         log.log(Level.INFO, "NavigationMBean.onNodeExpand ok load");
@@ -137,7 +152,7 @@ public class NavigationMBean implements Serializable {
      */
     public void onNodeCollapse(NodeCollapseEvent event) {
         log.info("NavigationMBean.onNodeCollapse collapse: " + event.getTreeNode());
-        updateSelect(selectedNode, event.getTreeNode());
+        updateSelect(selectedNode.get(selectedTab), event.getTreeNode());
     }
 
     /**
@@ -148,19 +163,34 @@ public class NavigationMBean implements Serializable {
     private void updateSelect(TreeNode oldNode, TreeNode newNode) {
         StringBuilder sb = new StringBuilder();
         if (oldNode != null) {
-            sb.append("PrimeFaces.widgets.orgTreeWidget.unselectNode(");
-            sb.append("$(\"#navig\\\\:orgTree\\\\:");
+            sb.append("PrimeFaces.widgets.");
+            sb.append(selectedTab);
+            sb.append("TreeWidget.unselectNode(");
+            sb.append("$(\"#navig\\\\:");
+            sb.append(selectedTab);
+            sb.append("Tree\\\\:");
             sb.append(oldNode.getRowKey());
-            sb.append("\")");
-            sb.append(", true);");
+            sb.append("\"), true);");
+
+            sb.append("PrimeFaces.widgets.");
+            sb.append(selectedTab);
+            sb.append("TreeWidget.selections = [];");
         }
-        sb.append("PrimeFaces.widgets.orgTreeWidget.selectNode(");
-        sb.append("$(\"#navig\\\\:orgTree\\\\:");
+        sb.append("PrimeFaces.widgets.");
+        sb.append(selectedTab);
+        sb.append("TreeWidget.selectNode(");
+        sb.append("$(\"#navig\\\\:");
+        sb.append(selectedTab);
+        sb.append("Tree\\\\:");
         sb.append(newNode.getRowKey());
-        sb.append("\")");
-        sb.append(", true);");
+        sb.append("\"));");
+
         PrimeFaces.current().executeScript(sb.toString());
+
+        updateSelectProgrammaticallyFlag = true;
     }
+
+    private boolean updateSelectProgrammaticallyFlag = false;
 
     /**
      * Обработчик выделения ветки дерева
@@ -168,11 +198,12 @@ public class NavigationMBean implements Serializable {
      * @param event ветка дерева
      */
     public void onNodeSelect(NodeSelectEvent event) {
-        if ((oldSelectNode != null) && (oldSelectNode == selectedNode)
+        if ((oldSelectNode.get(selectedTab) != null) && !updateSelectProgrammaticallyFlag
+                && (oldSelectNode.get(selectedTab) == selectedNode.get(selectedTab))
                 && ((System.currentTimeMillis() - timeOldSelectNode) < 500)) {
             log.info("NavigationMBean.onNodeSelect dblClick");
 
-            if (((TreeNodeModel) selectedNode.getData()).isLeaf()) {
+            if (((TreeNodeModel) selectedNode.get(selectedTab).getData()).isLeaf()) {
                 PrimeFaces.current().ajax().update(":action");
 
                 FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
@@ -183,18 +214,19 @@ public class NavigationMBean implements Serializable {
                     PrimeFaces.current().executeScript((String) faceletContext.getAttribute("invokeScript"));
                 }
             } else {
-                if (selectedNode.isExpanded()) {
-                    setExpandedNode(false, selectedNode);
+                if (selectedNode.get(selectedTab).isExpanded()) {
+                    setExpandedNode(false, selectedNode.get(selectedTab));
                 } else {
-                    parentNode = ((TreeNodeModel) event.getTreeNode().getData()).getId();
+                    parentNode.put(selectedTab, ((TreeNodeModel) event.getTreeNode().getData()).getId());
                     addTreeItems(event.getTreeNode());
 
-                    setExpandedNode(true, selectedNode);
+                    setExpandedNode(true, selectedNode.get(selectedTab));
                 }
             }
         } else {
-            oldSelectNode = selectedNode;
+            oldSelectNode.put(selectedTab, selectedNode.get(selectedTab));
             timeOldSelectNode = System.currentTimeMillis();
+            updateSelectProgrammaticallyFlag = false;
         }
     }
 
@@ -206,13 +238,17 @@ public class NavigationMBean implements Serializable {
      */
     private void setExpandedNode(boolean value, TreeNode node) {
         StringBuilder sb = new StringBuilder();
-        sb.append("PrimeFaces.widgets.orgTreeWidget.");
+        sb.append("PrimeFaces.widgets.");
+        sb.append(selectedTab);
+        sb.append("TreeWidget.");
         if (value) {
             sb.append("expandNode(");
         } else {
             sb.append("collapseNode(");
         }
-        sb.append("$(\"#navig\\\\:orgTree\\\\:");
+        sb.append("$(\"#navig\\\\:");
+        sb.append(selectedTab);
+        sb.append("Tree\\\\:");
         sb.append(node.getRowKey());
         sb.append("\")");
         sb.append(", true);");
@@ -245,28 +281,36 @@ public class NavigationMBean implements Serializable {
      */
     private void reloadAllTree() {
         //Определяем глубину вхождения
-        if (selectedNode == null) {
-            selectedNode = root;
+        if (selectedNode.get(selectedTab) == null) {
+            selectedNode.put(selectedTab, root.get(selectedTab));
         } else {
-            if (((TreeNodeModel) selectedNode.getData()).isLeaf()) {
-                selectedNode = selectedNode.getParent();
+            if (((TreeNodeModel) selectedNode.get(selectedTab).getData()).isLeaf()) {
+                selectedNode.put(selectedTab, selectedNode.get(selectedTab).getParent());
             }
         }
-        nodePath.add(selectedNode);
-        while (selectedNode.getParent() != null) {
-            selectedNode = selectedNode.getParent();
-            nodePath.add(selectedNode);
+        nodePath.get(selectedTab).add(selectedNode.get(selectedTab));
+        while (selectedNode.get(selectedTab).getParent() != null) {
+            selectedNode.put(selectedTab, selectedNode.get(selectedTab).getParent());
+            nodePath.get(selectedTab).add(selectedNode.get(selectedTab));
         }
-        nodePath.remove(nodePath.size() - 1);
+        nodePath.get(selectedTab).remove(nodePath.get(selectedTab).size() - 1);
 
-        log.info("NavigationMBean.reloadAllTree глубина обновления: " + nodePath);
+        log.info("NavigationMBean.reloadAllTree глубина обновления: " + nodePath.get(selectedTab));
 
-        selectedNode = null;
-
+        String oldSelectedTab = selectedTab;
         //Чистим дерево и запускаем его перстроение
-        root.getChildren().clear();
-        parentNode = DEFAULT_PARENT_NODE;
-        addTreeItems(root);
+        for (String item: DEFAULT_TAB_ID) {
+            selectedNode.put(item, null);
+            root.get(item).getChildren().clear();
+            parentNode.put(item, DEFAULT_PARENT_NODE.get(item));
+            selectedTab = item;
+            addTreeItems(root.get(item));
+        }
+        selectedTab = oldSelectedTab;
+    }
+
+    public void onTabChange(TabChangeEvent e) {
+        selectedTab = e.getTab().getId();
     }
 
     public String getSearchText() {
@@ -278,13 +322,13 @@ public class NavigationMBean implements Serializable {
     }
 
     public TreeNode getSelectedNode() {
-        return selectedNode;
+        return selectedNode.get(selectedTab);
     }
 
     public void setSelectedNode(TreeNode selectedNode) {
-        this.selectedNode = selectedNode;
-        if (Objects.nonNull(this.selectedNode)) {
-            selectedNodeId = ((TreeNodeModel) this.selectedNode.getData()).getId();
+        this.selectedNode.put(selectedTab, selectedNode);
+        if (Objects.nonNull(this.selectedNode.get(selectedTab))) {
+            selectedNodeId = ((TreeNodeModel) this.selectedNode.get(selectedTab).getData()).getId();
         }
     }
 
@@ -296,7 +340,7 @@ public class NavigationMBean implements Serializable {
         this.user = user;
     }
 
-    public TreeNode getRoot() {
+    public Map<String, TreeNode> getRoot() {
         return root;
     }
 
