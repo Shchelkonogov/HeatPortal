@@ -6,7 +6,7 @@
     <p:panel id="navigPanel" header="Навигация" style="width: 100%; height: 100%;">
 
         <h:form id="navig" style="height: calc(100% - 43px)">
-            <h:panelGrid columns="2" styleClass="fieldwrapper">
+            <h:panelGrid columns="2" styleClass="fieldWrapper">
                 <p:outputLabel for="objType" value="Тип объекта:"/>
                 <p:selectOneMenu id="objType" value="#{navigation.selectedObjType}" dynamic="true"
                                  style="width: 202px">
@@ -58,7 +58,7 @@
                 <p:ajax event="tabChange" listener="#{navigation.onTabChange}"/>
             </p:tabView>
 
-            <h:panelGrid columns="2" styleClass="fieldwrapper" style="margin-top: 3px">
+            <h:panelGrid columns="2" styleClass="fieldWrapper" style="margin-top: 3px">
                 <p:outputLabel for="search" value="Тип поиска:"/>
                 <p:selectOneMenu id="search" value="#{navigation.selectedSearch}" dynamic="true"
                                  style="width: 210px">

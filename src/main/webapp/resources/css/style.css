@@ -11,7 +11,7 @@ html, body {
 #page{
     padding: 5px;
     width: 100%;
-    min-width: 800px;
+    min-width: 1280px;
     height: 100%;
     min-height: 400px;
 }
@@ -94,7 +94,7 @@ li.ui-menubar-options {
     box-sizing: border-box;
 }
 
-.fieldwrapper {
+.fieldWrapper {
     white-space: nowrap;
 }
 
@@ -116,43 +116,34 @@ li.ui-menubar-options {
     overflow: unset !important;
 }
 
-.ui-datatable table {
-    /*table-layout: auto !important;*/
-}
-
 #dataGrid .ui-datatable-scrollable-body {
     max-height: calc(100% - 150px) !important;
 }
 
 .yellow {
-    height: 37.27px;
     color: black;
     background-color: yellow;
 }
 
 .gray {
-    height: 37.27px;
     color: white;
     background-color: gray;
 }
 
 .red {
-    height: 37.27px;
     background-color: red;
 }
 
 .blue {
-    height: 37.27px;
     color: white;
     background-color: #007ad9;
 }
 
 .none {
-    height: 37.27px;
 }
 
 .frozenColumnStyle {
-    width: 50px;
+    text-overflow: ellipsis;
     text-align: center;
     white-space: nowrap;
 }
@@ -180,4 +171,12 @@ li.ui-menubar-options {
 #navig\:ter, #navig\:org {
     height: 100%;
     padding: 1px 0 0;
+}
+
+body .ui-datatable thead th {
+    padding: 1px;
+}
+
+body .ui-datatable .ui-datatable-data>tr>td {
+    padding: 2px 1px;
 }
