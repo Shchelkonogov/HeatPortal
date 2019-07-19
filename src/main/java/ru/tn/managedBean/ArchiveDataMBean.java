@@ -1,11 +1,11 @@
 package ru.tn.managedBean;
 
-import com.sun.xml.bind.v2.TODO;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
 import ru.tn.model.archiveData.ColumnModel;
 import ru.tn.model.archiveData.DataModel;
+import ru.tn.model.archiveData.HeaderWrapper;
 import ru.tn.sessionBean.ArchiveData.ArchiveDataSBean;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +16,10 @@ import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +32,7 @@ public class ArchiveDataMBean implements Serializable {
     // TODO Следущий этап с таблицей это реализовать подгрузку соседних данных в других потоках
     //  а затем реализовать обработку смещения данных влево вправо на 1 час на не на сутки
     //  основываясь на подгруженной информации
-    //  можно еще вначале сделать смещение шапки на 1 час
+    //  можно еще вначале сделать смещение шапки на 1 час (вроде работает)
 
     private static final Logger LOG = Logger.getLogger(ArchiveDataMBean.class.getName());
 
@@ -39,6 +42,7 @@ public class ArchiveDataMBean implements Serializable {
     private ArchiveDataSBean bean;
 
     private Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+    private LocalDateTime startHeadDate;
 
     private int object = 0;
 
@@ -48,6 +52,7 @@ public class ArchiveDataMBean implements Serializable {
     private String mnemoUrl;
 
     private List<ColumnModel> columns = new ArrayList<>();
+    private List<HeaderWrapper> headerWrapper = new ArrayList<>();
     private List<DataModel> gridData = new ArrayList<>();
     private List<DataModel> selectedRows = new ArrayList<>();
 
@@ -60,6 +65,7 @@ public class ArchiveDataMBean implements Serializable {
     @PostConstruct
     private void init() {
         mnemoUrl = bean.getMnemoUrl();
+        startHeadDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     /**
@@ -78,9 +84,21 @@ public class ArchiveDataMBean implements Serializable {
                 break;
             }
         }
+
+        updateHeader();
+    }
+
+    private void updateHeader() {
         columns.clear();
+        headerWrapper.clear();
         for (int i = 0; i < colSpan; i++) {
-            columns.add(new ColumnModel((i + 1) + "ч", "data." + i, "data." + i + ".color"));
+            String date = startHeadDate.plusHours(i).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            if (headerWrapper.contains(new HeaderWrapper(date))) {
+                headerWrapper.get(headerWrapper.indexOf(new HeaderWrapper(date))).incrementColumnCount();
+            } else {
+                headerWrapper.add(new HeaderWrapper(date));
+            }
+            columns.add(new ColumnModel(startHeadDate.plusHours(i).getHour() + "ч", "data." + i, "data." + i + ".color"));
         }
     }
 
@@ -91,6 +109,9 @@ public class ArchiveDataMBean implements Serializable {
      */
     public void showName(String value) {
         if (!value.equals("")) {
+            setDate(Date.from(startHeadDate.truncatedTo(ChronoUnit.DAYS).atZone(ZoneId.systemDefault()).toInstant()));
+            updateHeader();
+
             headerName = "по объекту: " + bean.getObjectPath(value);
 
             object = Integer.parseInt(value.substring(1));
@@ -105,6 +126,7 @@ public class ArchiveDataMBean implements Serializable {
 
     public void onDateSelect(SelectEvent event) {
         LOG.info("ArchiveDataMBean.onDateSelect select date " + event.getObject());
+        updateHeader();
         if (object != 0) {
             gridData = bean.loadData(object, sdf.format(date));
             selectColumn(0);
@@ -155,18 +177,20 @@ public class ArchiveDataMBean implements Serializable {
     public void moveTableData() {
         String direction = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("direction");
 
-        LocalDate lDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDateTime lDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         switch (direction) {
             case "left": {
-                date = Date.from(lDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                setDate(Date.from(lDate.plusHours(1).atZone(ZoneId.systemDefault()).toInstant()));
                 break;
             }
             case "right": {
-                date = Date.from(lDate.minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                setDate(Date.from(lDate.minusHours(1).atZone(ZoneId.systemDefault()).toInstant()));
                 break;
             }
         }
+
+        updateHeader();
 
         if (object != 0) {
             gridData = bean.loadData(object, sdf.format(date));
@@ -204,6 +228,7 @@ public class ArchiveDataMBean implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+        startHeadDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public String getMnemoUrl() {
@@ -230,7 +255,7 @@ public class ArchiveDataMBean implements Serializable {
         this.selectedRows = selectedRows;
     }
 
-    public int getColSpan() {
-        return colSpan;
+    public List<HeaderWrapper> getHeaderWrapper() {
+        return headerWrapper;
     }
 }

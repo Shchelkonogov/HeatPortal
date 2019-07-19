@@ -66,7 +66,11 @@
                                             <p:column rowspan="2" headerText="Min" style="width: 75px;"/>
                                             <p:column rowspan="2" headerText="Max" style="width: 75px;"/>
                                             <p:column rowspan="2" headerText="Итоги" style="width: 75px;"/>
-                                            <p:column colspan="#{archiveData.colSpan}" headerText="#{archiveData.date}" style="width: unset"/>
+                                            <p:repeat value="#{archiveData.headerWrapper}" var="headerWrapper">
+                                                <p:column colspan="#{headerWrapper.columnCount}"
+                                                          headerText="#{headerWrapper.name}"
+                                                          style="width: unset; text-overflow: ellipsis;"/>
+                                            </p:repeat>
                                         </p:row>
                                         <p:row>
                                             <p:repeat value="#{archiveData.columns}" var="column">
