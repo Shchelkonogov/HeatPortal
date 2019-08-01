@@ -11,6 +11,7 @@ public class DataModel implements Serializable {
     private int statAgr;
 
     private int paramTypeId;
+    private String paramTypeName;
 
     private boolean analog;
     private String calculateType;
@@ -23,17 +24,19 @@ public class DataModel implements Serializable {
     private String result = "-";
     private DataValueModel[] data;
 
-    public DataModel(boolean analog, String calculateType, String name, String techProc, String si, int paramTypeId) {
+    public DataModel(boolean analog, String calculateType, String name, String techProc, String si, int paramTypeId,
+                     String paramTypeName) {
         this.analog = analog;
         this.calculateType = calculateType;
         this.name = name;
         this.techProc = techProc;
         this.si = si;
         this.paramTypeId = paramTypeId;
+        this.paramTypeName = paramTypeName;
     }
 
     public DataModel(int paramId, int statAgr, boolean analog, String name, String techProc,
-                     String si, String calculateType, int paramTypeId) {
+                     String si, String calculateType, int paramTypeId, String paramTypeName) {
         this.paramId = paramId;
         this.statAgr = statAgr;
         this.analog = analog;
@@ -42,6 +45,7 @@ public class DataModel implements Serializable {
         this.si = si;
         this.calculateType = calculateType;
         this.paramTypeId = paramTypeId;
+        this.paramTypeName = paramTypeName;
     }
 
     public String getName() {
@@ -118,6 +122,10 @@ public class DataModel implements Serializable {
 
     public String getCalculateType() {
         return calculateType;
+    }
+
+    public String getParamTypeName() {
+        return paramTypeName;
     }
 
     public void calcResult() {

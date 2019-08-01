@@ -3,10 +3,7 @@ package ru.tn.managedBean;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import ru.tn.model.archiveData.ColumnModel;
-import ru.tn.model.archiveData.DataModel;
-import ru.tn.model.archiveData.DataValueModel;
-import ru.tn.model.archiveData.HeaderWrapper;
+import ru.tn.model.archiveData.*;
 import ru.tn.sessionBean.ArchiveData.ArchiveDataSBean;
 
 import javax.annotation.PostConstruct;
@@ -59,6 +56,7 @@ public class ArchiveDataMBean implements Serializable {
     private boolean mapStatus = false;
 
     private Set<String> techProcFilter = new TreeSet<>();
+    private Set<ParamType> paramTypeFilter = new TreeSet<>();
 
     @PostConstruct
     private void init() {
@@ -210,6 +208,7 @@ public class ArchiveDataMBean implements Serializable {
      */
     private void loadData() {
         techProcFilter.clear();
+        paramTypeFilter.clear();
         List<DataModel> model;
         gridData = new ArrayList<>();
         LocalDate tempDate;
@@ -226,13 +225,15 @@ public class ArchiveDataMBean implements Serializable {
                     gridData.add(new DataModel(model.get(j).getParamId(), model.get(j).getStatAgr(),
                             model.get(j).isAnalog(), model.get(j).getName(),
                             model.get(j).getTechProc(), model.get(j).getSi(),
-                            model.get(j).getCalculateType(), model.get(j).getParamTypeId()));
+                            model.get(j).getCalculateType(), model.get(j).getParamTypeId(),
+                            model.get(j).getParamTypeName()));
                     gridData.get(j).setMin(model.get(j).getMin());
                     gridData.get(j).setMax(model.get(j).getMax());
                     gridData.get(j).setResult(model.get(j).getResult());
                     gridData.get(j).setData(new DataValueModel[COLUMN_SIZE]);
 
                     techProcFilter.add(gridData.get(j).getTechProc());
+                    paramTypeFilter.add(new ParamType(gridData.get(j).getParamTypeId(), gridData.get(j).getParamTypeName()));
                 }
             }
 
@@ -249,6 +250,8 @@ public class ArchiveDataMBean implements Serializable {
                 index++;
             } while (tempDate.isEqual(tempTime.toLocalDate()) && index < COLUMN_SIZE);
         }
+
+        PrimeFaces.current().executeScript("PF('dataGridWidget').filter()");
     }
 
     public List<ColumnModel> getColumns() {
@@ -314,5 +317,9 @@ public class ArchiveDataMBean implements Serializable {
 
     public Set<String> getTechProcFilter() {
         return techProcFilter;
+    }
+
+    public Set<ParamType> getParamTypeFilter() {
+        return paramTypeFilter;
     }
 }

@@ -33,9 +33,10 @@ public class ArchiveDataSBean {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    private static final String SQL_DATA = "select par_id, stat_aggr, categ, dif_int, techproc_type_id, param_type_id, " +
-            "par_code, par_memo, proc_name, measure_id, measure_name " +
-            "from table (dsp_0032t.get_obj_params(?)) order by visible";
+    private static final String SQL_DATA = "select a.par_id, a.stat_aggr, a.categ, a.dif_int, a.techproc_type_id, a.param_type_id, "+
+            "a.par_code, a.par_memo, a.proc_name, a.measure_id, a.measure_name, "+
+            "(select param_type_name from dz_param_type where param_type_id = a.param_type_id) as param_type_name "+
+            "from table (dsp_0032t.get_obj_params(?)) a order by visible";
     private static final String SQL_PATH = "select dsp_0032t.get_obj_full_path(?) from dual";
     private static final String SQL_GET_ADDRESS = "select get_obj_address(?) from dual";
 
@@ -104,7 +105,8 @@ public class ArchiveDataSBean {
                 data.add(new DataModel(res.getInt("par_id"), res.getInt("stat_aggr"),
                         res.getString("categ").equals("A"), res.getString("par_memo"),
                         res.getString("proc_name"), res.getString("measure_name"),
-                        res.getString("dif_int"), res.getInt("param_type_id")));
+                        res.getString("dif_int"), res.getInt("param_type_id"),
+                        res.getString("param_type_name")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -129,7 +131,7 @@ public class ArchiveDataSBean {
             }
 
             //Добавляем параметр температура наружного воздуха и кладем туда данные
-            data.add(0, new DataModel(true, "D", "Тгмц", "-", "°C", 1));
+            data.add(0, new DataModel(true, "D", "Тгмц", "-", "°C", 1, "Температура"));
             data.get(0).setMin("-");
             data.get(0).setMax("-");
             data.get(0).setData(outTemp.get());

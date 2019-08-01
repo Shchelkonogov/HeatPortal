@@ -61,21 +61,32 @@
                                     <p:columnGroup type="header">
                                         <p:row>
                                             <p:column rowspan="2" headerText="" style="width: 20px;"/>
-                                            <p:column rowspan="2" headerText="Обозн." style="width: 75px;"/>
-                                            <p:column rowspan="2" headerText="Тех. пр." style="width: 75px;"
+                                            <p:column rowspan="2" headerText="Обозн." style="width: 90px;"
+                                                      filterBy="#{rowData.paramTypeId}" filterMatchMode="in">
+                                                <f:facet name="filter">
+                                                    <p:selectCheckboxMenu label="Типы" onchange="PF('dataGridWidget').filter()"
+                                                                          style="width: 85px;">
+                                                        <f:converter converterId="javax.faces.Integer"/>
+                                                        <f:selectItems var="paramFilter" value="#{archiveData.paramTypeFilter}"
+                                                                       itemLabel="#{paramFilter.value}"
+                                                                       itemValue="#{paramFilter.id}"/>
+                                                    </p:selectCheckboxMenu>
+                                                </f:facet>
+                                            </p:column>
+                                            <p:column rowspan="2" headerText="Тех. пр." style="width: 90px;"
                                                       filterBy="#{rowData.techProc}" filterMatchMode="in">
                                                 <f:facet name="filter">
-                                                    <p:selectCheckboxMenu label="Кат..." onchange="PF('dataGridWidget').filter()"
-                                                                     style="width: 70px;">
+                                                    <p:selectCheckboxMenu label="Катег..." onchange="PF('dataGridWidget').filter()"
+                                                                     style="width: 85px;">
                                                         <f:selectItems value="#{archiveData.techProcFilter}"/>
                                                     </p:selectCheckboxMenu>
                                                 </f:facet>
                                             </p:column>
-                                            <p:column rowspan="2" headerText="Е.И." style="width: 75px;"
+                                            <p:column rowspan="2" headerText="Е.И." style="width: 90px;"
                                                       filterBy="#{rowData.analog}" filterMatchMode="equals">
                                                 <f:facet name="filter">
                                                     <p:selectOneMenu onchange="PF('dataGridWidget').filter()"
-                                                                     style="width: 70px;">
+                                                                     style="width: 85px;">
                                                         <f:converter converterId="javax.faces.Boolean" />
                                                         <f:selectItem itemLabel="Все" itemValue="" />
                                                         <f:selectItem itemLabel="Аналоговые" itemValue="true" />

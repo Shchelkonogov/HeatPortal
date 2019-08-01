@@ -184,3 +184,7 @@ body .ui-datatable .ui-datatable-data>tr>td {
 .ui-column-customfilter {
     height: 39px;
 }
+
+.ui-selectonemenu-label {
+    text-overflow: ellipsis;
+}
