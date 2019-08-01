@@ -2,6 +2,7 @@ package ru.tn.sessionBean.ArchiveData;
 
 import ru.tn.model.archiveData.DataModel;
 import ru.tn.model.archiveData.DataValueModel;
+import ru.tn.sessionBean.cache.ObjectDataCacheSBean;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -11,6 +12,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +31,8 @@ public class ArchiveDataSBean {
 
     private static final Logger LOG = Logger.getLogger(ArchiveDataSBean.class.getName());
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     private static final String SQL_DATA = "select par_id, stat_aggr, categ, dif_int, techproc_type_id, param_type_id, " +
             "par_code, par_memo, proc_name, measure_id, measure_name " +
             "from table (dsp_0032t.get_obj_params(?)) order by visible";
@@ -41,6 +47,9 @@ public class ArchiveDataSBean {
 
     @Resource
     private ManagedExecutorService mes;
+
+    @EJB
+    private ObjectDataCacheSBean objectDataCache;
 
     /**
      * Метод возвращает географический адрес объекта
@@ -69,6 +78,21 @@ public class ArchiveDataSBean {
     public List<DataModel> loadData(int objectId, String date) {
         LOG.info("ArchiveDataSBean.loadData objectId: " + objectId);
         long timer = System.currentTimeMillis();
+
+        int keyIncrement = 0;
+        if (LocalDate.parse(date, FORMATTER).equals(LocalDate.now())) {
+            keyIncrement = LocalDateTime.now().getHour();
+        }
+
+        long key = (objectId + date + keyIncrement).hashCode();
+        if (objectDataCache.containsCache(key)) {
+            LOG.info("loadData key: " + key + " data from cache");
+            return objectDataCache.getCache(key);
+        }
+
+        if (LocalDate.parse(date, FORMATTER).isAfter(LocalDate.now())) {
+            return null;
+        }
 
         List<DataModel> data = new ArrayList<>();
         try (Connection connect = ds.getConnection();
@@ -121,6 +145,8 @@ public class ArchiveDataSBean {
                 model.setMax(model.getData()[0].getMax());
             }
         }
+
+        objectDataCache.putCache(key, data);
 
         LOG.info("ArchiveDataSBean.loadData " + (System.currentTimeMillis() - timer) + " " + data);
         return data;
