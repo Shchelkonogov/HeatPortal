@@ -5,6 +5,7 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
 import ru.tn.model.archiveData.ColumnModel;
 import ru.tn.model.archiveData.DataModel;
+import ru.tn.model.archiveData.DataValueModel;
 import ru.tn.model.archiveData.HeaderWrapper;
 import ru.tn.sessionBean.ArchiveData.ArchiveDataSBean;
 
@@ -20,23 +21,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 @ManagedBean(name = "archiveData")
 @ViewScoped
 public class ArchiveDataMBean implements Serializable {
 
-    // TODO Следущий этап с таблицей это реализовать подгрузку соседних данных в других потоках
-    //  а затем реализовать обработку смещения данных влево вправо на 1 час на не на сутки
-    //  основываясь на подгруженной информации
-    //  можно еще вначале сделать смещение шапки на 1 час (вроде работает)
-
     private static final Logger LOG = Logger.getLogger(ArchiveDataMBean.class.getName());
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+    private static final int COLUMN_SIZE = 31;
 
     @EJB
     private ArchiveDataSBean bean;
@@ -61,6 +57,8 @@ public class ArchiveDataMBean implements Serializable {
     private String headerName;
 
     private boolean mapStatus = false;
+
+    private Set<String> techProcFilter = new TreeSet<>();
 
     @PostConstruct
     private void init() {
@@ -88,6 +86,9 @@ public class ArchiveDataMBean implements Serializable {
         updateHeader();
     }
 
+    /**
+     * Метод обновляет данные для шапки таблицы
+     */
     private void updateHeader() {
         columns.clear();
         headerWrapper.clear();
@@ -117,7 +118,7 @@ public class ArchiveDataMBean implements Serializable {
             object = Integer.parseInt(value.substring(1));
 
             selectedRows.clear();
-            gridData = bean.loadData(object, sdf.format(date));
+            loadData();
             selectColumn(0);
 
             mapStatus = false;
@@ -128,7 +129,7 @@ public class ArchiveDataMBean implements Serializable {
         LOG.info("ArchiveDataMBean.onDateSelect select date " + event.getObject());
         updateHeader();
         if (object != 0) {
-            gridData = bean.loadData(object, sdf.format(date));
+            loadData();
             selectColumn(0);
         }
     }
@@ -147,6 +148,7 @@ public class ArchiveDataMBean implements Serializable {
                 }
                 data.setMin(data.getData()[Integer.parseInt(mySelectedColumnField)].getMin());
                 data.setMax(data.getData()[Integer.parseInt(mySelectedColumnField)].getMax());
+                data.setResult(data.getData()[Integer.parseInt(mySelectedColumnField)].getResult());
             }
 
             oldSelectedColumn = mySelectedColumnField;
@@ -158,6 +160,9 @@ public class ArchiveDataMBean implements Serializable {
             if ((data.getData()[index] != null) && data.getData()[index].getColor().equals("none")) {
                 data.getData()[index].setColor("blue");
             }
+            data.setMin(data.getData()[0].getMin());
+            data.setMax(data.getData()[0].getMax());
+            data.setResult(data.getData()[0].getResult());
         }
         oldSelectedColumn = String.valueOf(index);
     }
@@ -193,8 +198,56 @@ public class ArchiveDataMBean implements Serializable {
         updateHeader();
 
         if (object != 0) {
-            gridData = bean.loadData(object, sdf.format(date));
+            loadData();
             selectColumn(0);
+        }
+    }
+
+    /**
+     * Метод формирует данные для таблицы из данных из бина.
+     * Копирует данные из бина, что бы не изменялись они в кешах.
+     * Формирует новые данные для отображения.
+     */
+    private void loadData() {
+        techProcFilter.clear();
+        List<DataModel> model;
+        gridData = new ArrayList<>();
+        LocalDate tempDate;
+        LocalDateTime tempTime = LocalDateTime.from(startHeadDate);
+        int index  = 0;
+        for (int i = 0; i < headerWrapper.size(); i++) {
+            model = bean.loadData(object, headerWrapper.get(i).getName());
+            if (model == null) {
+                continue;
+            }
+
+            if (i == 0) {
+                for (int j = 0; j < model.size(); j++) {
+                    gridData.add(new DataModel(model.get(j).getParamId(), model.get(j).getStatAgr(),
+                            model.get(j).isAnalog(), model.get(j).getName(),
+                            model.get(j).getTechProc(), model.get(j).getSi(),
+                            model.get(j).getCalculateType(), model.get(j).getParamTypeId()));
+                    gridData.get(j).setMin(model.get(j).getMin());
+                    gridData.get(j).setMax(model.get(j).getMax());
+                    gridData.get(j).setResult(model.get(j).getResult());
+                    gridData.get(j).setData(new DataValueModel[COLUMN_SIZE]);
+
+                    techProcFilter.add(gridData.get(j).getTechProc());
+                }
+            }
+
+            tempDate = LocalDate.parse(headerWrapper.get(i).getName(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            do {
+                for (int j = 0; j < gridData.size(); j++) {
+                    gridData.get(j).getData()[index] = new DataValueModel(model.get(j).getData()[tempTime.getHour()].getValue(),
+                            model.get(j).getData()[tempTime.getHour()].getColor());
+                    gridData.get(j).getData()[index].setMin(model.get(j).getData()[tempTime.getHour()].getMin());
+                    gridData.get(j).getData()[index].setMax(model.get(j).getData()[tempTime.getHour()].getMax());
+                    gridData.get(j).getData()[index].setResult(model.get(j).getData()[tempTime.getHour()].getResult());
+                }
+                tempTime = tempTime.plusHours(1);
+                index++;
+            } while (tempDate.isEqual(tempTime.toLocalDate()) && index < COLUMN_SIZE);
         }
     }
 
@@ -257,5 +310,9 @@ public class ArchiveDataMBean implements Serializable {
 
     public List<HeaderWrapper> getHeaderWrapper() {
         return headerWrapper;
+    }
+
+    public Set<String> getTechProcFilter() {
+        return techProcFilter;
     }
 }
