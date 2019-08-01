@@ -9,6 +9,7 @@ public class DataValueModel implements Serializable {
     private String color = "none";
     private String min = "-";
     private String max = "-";
+    private String result = "-";
 
     public DataValueModel() {
     }
@@ -54,6 +55,14 @@ public class DataValueModel implements Serializable {
         this.max = max;
     }
 
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DataValueModel.class.getSimpleName() + "[", "]")
@@ -61,6 +70,7 @@ public class DataValueModel implements Serializable {
                 .add("color='" + color + "'")
                 .add("min='" + min + "'")
                 .add("max='" + max + "'")
+                .add("result='" + result + "'")
                 .toString();
     }
 }

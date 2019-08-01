@@ -116,6 +116,10 @@ public class DataModel implements Serializable {
         return paramTypeId;
     }
 
+    public String getCalculateType() {
+        return calculateType;
+    }
+
     public void calcResult() {
         BigDecimal sum = BigDecimal.ZERO;
         BigDecimal tempValue;
@@ -164,6 +168,10 @@ public class DataModel implements Serializable {
                     result = data[0].getValue();
                 }
             }
+        }
+
+        for (DataValueModel el: data) {
+            el.setResult(result);
         }
     }
 
