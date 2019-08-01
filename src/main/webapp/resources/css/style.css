@@ -180,3 +180,7 @@ body .ui-datatable thead th {
 body .ui-datatable .ui-datatable-data>tr>td {
     padding: 2px 1px;
 }
+
+.ui-column-customfilter {
+    height: 39px;
+}

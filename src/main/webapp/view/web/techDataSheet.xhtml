@@ -56,13 +56,33 @@
                                 <p:dataTable id="dataGrid" var="rowData" value="#{archiveData.gridData}"
                                              scrollable="true" scrollHeight="100%" emptyMessage="Данных нет"
                                              selection="#{archiveData.selectedRows}"
-                                             rowKey="#{rowData.paramId}#{rowData.statAgr}">
+                                             rowKey="#{rowData.paramId}#{rowData.statAgr}"
+                                             widgetVar="dataGridWidget">
                                     <p:columnGroup type="header">
                                         <p:row>
                                             <p:column rowspan="2" headerText="" style="width: 20px;"/>
                                             <p:column rowspan="2" headerText="Обозн." style="width: 75px;"/>
-                                            <p:column rowspan="2" headerText="Тех. пр." style="width: 75px;"/>
-                                            <p:column rowspan="2" headerText="Е.И." style="width: 75px;"/>
+                                            <p:column rowspan="2" headerText="Тех. пр." style="width: 75px;"
+                                                      filterBy="#{rowData.techProc}" filterMatchMode="in">
+                                                <f:facet name="filter">
+                                                    <p:selectCheckboxMenu label="Кат..." onchange="PF('dataGridWidget').filter()"
+                                                                     style="width: 70px;">
+                                                        <f:selectItems value="#{archiveData.techProcFilter}"/>
+                                                    </p:selectCheckboxMenu>
+                                                </f:facet>
+                                            </p:column>
+                                            <p:column rowspan="2" headerText="Е.И." style="width: 75px;"
+                                                      filterBy="#{rowData.analog}" filterMatchMode="equals">
+                                                <f:facet name="filter">
+                                                    <p:selectOneMenu onchange="PF('dataGridWidget').filter()"
+                                                                     style="width: 70px;">
+                                                        <f:converter converterId="javax.faces.Boolean" />
+                                                        <f:selectItem itemLabel="Все" itemValue="" />
+                                                        <f:selectItem itemLabel="Аналоговые" itemValue="true" />
+                                                        <f:selectItem itemLabel="Перечислимые" itemValue="false" />
+                                                    </p:selectOneMenu>
+                                                </f:facet>
+                                            </p:column>
                                             <p:column rowspan="2" headerText="Min" style="width: 75px;"/>
                                             <p:column rowspan="2" headerText="Max" style="width: 75px;"/>
                                             <p:column rowspan="2" headerText="Итоги" style="width: 75px;"/>
