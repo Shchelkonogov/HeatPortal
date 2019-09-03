@@ -55,6 +55,8 @@ public class ArchiveDataMBean implements Serializable {
     private Set<String> techProcFilter = new TreeSet<>();
     private Set<ParamType> paramTypeFilter = new TreeSet<>();
 
+    private String dateType = "Hour";
+
     @PostConstruct
     private void init() {
         mnemoUrl = bean.getMnemoUrl();
@@ -318,5 +320,13 @@ public class ArchiveDataMBean implements Serializable {
 
     public Set<ParamType> getParamTypeFilter() {
         return paramTypeFilter;
+    }
+
+    public String getDateType() {
+        return dateType;
+    }
+
+    public void setDateType(String dateType) {
+        this.dateType = dateType;
     }
 }

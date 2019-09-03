@@ -28,7 +28,7 @@
                 <p:remoteCommand name="moveTableData" action="#{archiveData.moveTableData()}"
                                  onstart="saveScrollPos()"
                                  oncomplete="setScrollPos(); setTableEvents()"
-                                 update=":tabView:dataGrid :tabView:dateSelect"/>
+                                 update=":tabView:dataGrid :dialog"/>
                 <p:remoteCommand name="initTable" action="#{archiveData.initTable}"
                                  onstart="saveScrollPos()"
                                  oncomplete="setScrollPos(); setTableEvents()"
@@ -41,18 +41,12 @@
                         <p:ajax event="tabChange" listener="#{archiveData.onTabChange}"/>
 
                         <p:tab id="tab1" title="Архивные данные">
-                            <p:datePicker id="dateSelect" value="#{archiveData.date}">
-                                <p:ajax event="dateSelect" onstart="saveScrollPos()"
-                                        oncomplete="setScrollPos(); setTableEvents()"
-                                        listener="#{archiveData.onDateSelect}" update=":tabView:dataGrid"/>
-                            </p:datePicker>
-
                             <h:inputHidden id="scrollPos"/>
                             <p:inputText id="mySelectedColumnId" type="hidden" value="#{archiveData.mySelectedColumnField}">
                                 <p:ajax event="change"/>
                             </p:inputText>
 
-                            <div style="height: calc(100% - 37px);">
+                            <div style="height: 100%;">
                                 <p:dataTable id="dataGrid" var="rowData" value="#{archiveData.gridData}"
                                              scrollable="true" scrollHeight="100%" emptyMessage="Данных нет"
                                              selection="#{archiveData.selectedRows}"
@@ -60,7 +54,14 @@
                                              widgetVar="dataGridWidget">
                                     <p:columnGroup type="header">
                                         <p:row>
-                                            <p:column rowspan="2" headerText="" style="width: 20px;"/>
+                                            <p:column rowspan="2" headerText="" style="width: 20px;">
+                                                <f:facet name="header">
+                                                    <p:commandButton style="margin-top: 8px; width: 20px; height: 20px;"
+                                                                     type="button"
+                                                                     icon="pi pi-bars"
+                                                                     onclick="PF('dlg').show()"/>
+                                                </f:facet>
+                                            </p:column>
                                             <p:column rowspan="2" headerText="Обозн." style="width: 90px;"
                                                       filterBy="#{rowData.paramTypeId}" filterMatchMode="in">
                                                 <f:facet name="filter">
@@ -156,6 +157,30 @@
                             </div>
                         </p:tab>
                     </p:tabView>
+
+                    <p:dialog id="dialog" header="Выбор даты" widgetVar="dlg" modal="true" resizable="false" focus="opt2">
+                        <p:outputPanel id="customPanel" style="margin-bottom:10px">
+                            <p:selectOneRadio id="customRadio" layout="custom" value="#{archiveData.dateType}">
+                                <f:selectItem itemLabel="Часы" itemValue="Hour" />
+                                <f:selectItem itemLabel="Сутки" itemValue="Day" />
+                                <p:ajax process="@this" update=":customPanel" />
+                            </p:selectOneRadio>
+
+                            <h:panelGrid columns="3" cellpadding="5">
+                                <p:radioButton id="opt1" for="customRadio" itemIndex="0" />
+                                <h:outputLabel for="opt1" value="Часы" />
+                                <p:calendar value="#{archiveData.date}" disabled="#{archiveData.dateType != 'Hour'}">
+                                    <p:ajax event="dateSelect" onstart="saveScrollPos()"
+                                            oncomplete="setScrollPos(); setTableEvents()"
+                                            listener="#{archiveData.onDateSelect}" update=":tabView:dataGrid"/>
+                                </p:calendar>
+
+                                <p:radioButton id="opt2" for="customRadio" itemIndex="1" />
+                                <h:outputLabel for="opt2" value="Сутки" />
+                                <p:inputText value="TODO" disabled="#{archiveData.dateType != 'Day'}" />
+                            </h:panelGrid>
+                        </p:outputPanel>
+                    </p:dialog>
                 </h:form>
             </p:panel>
         </ui:define>
