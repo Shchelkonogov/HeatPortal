@@ -172,7 +172,7 @@ public class DataModel implements Serializable {
             if (count != 0) {
                 result = "~" + sum.toPlainString();
             } else {
-                if (data[0] != null) {
+                if ((data[0] != null) && (data[0].getValue() != null)) {
                     result = data[0].getValue();
                 }
             }
