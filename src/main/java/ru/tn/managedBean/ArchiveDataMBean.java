@@ -12,7 +12,6 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,8 +25,6 @@ import java.util.logging.Logger;
 public class ArchiveDataMBean implements Serializable {
 
     private static final Logger LOG = Logger.getLogger(ArchiveDataMBean.class.getName());
-
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private static final int COLUMN_SIZE = 31;
 
