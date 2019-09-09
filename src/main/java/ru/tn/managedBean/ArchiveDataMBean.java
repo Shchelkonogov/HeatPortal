@@ -3,6 +3,14 @@ package ru.tn.managedBean;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
+import org.primefaces.model.charts.ChartData;
+import org.primefaces.model.charts.axes.cartesian.CartesianScaleLabel;
+import org.primefaces.model.charts.axes.cartesian.CartesianScales;
+import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
+import org.primefaces.model.charts.line.LineChartDataSet;
+import org.primefaces.model.charts.line.LineChartModel;
+import org.primefaces.model.charts.line.LineChartOptions;
+import org.primefaces.model.charts.optionconfig.title.Title;
 import ru.tn.model.archiveData.*;
 import ru.tn.sessionBean.ArchiveData.ArchiveDataSBean;
 
@@ -12,6 +20,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @ManagedBean(name = "archiveData")
 @ViewScoped
@@ -56,6 +66,15 @@ public class ArchiveDataMBean implements Serializable {
     private Set<ParamType> paramTypeFilter = new TreeSet<>();
 
     private String dateType = "Hour";
+
+    //Имена для заголовка панели
+    private String tabName = "Архивные данные";
+
+    //Модели для графиков
+    private List<LineChartModel> charts = new ArrayList<>();
+    //Набор цветов для графиков
+    private List<String> colors = new ArrayList<>(Arrays.asList("rgb(75, 192, 192)", "#EF161E", "#2DBE2C",
+            "#0078BE", "#DE64A1", "#8D5B2D", "#ED9121", "#800080", "#FFD702", "#99CC00", "#9999FF"));
 
     @PostConstruct
     private void init() {
@@ -164,11 +183,199 @@ public class ArchiveDataMBean implements Serializable {
         oldSelectedColumn = String.valueOf(index);
     }
 
+    /**
+     * Метод срабатывает при изменение закладки
+     * @param event событие {@link TabChangeEvent}
+     */
     public void onTabChange(TabChangeEvent event) {
         if (!mapStatus && event.getTab().getId().equals("tab3")) {
+            LOG.info("ArchiveDataMBean.onTabChange select tab3 (map)");
             mapStatus = true;
-            LOG.info("ArchiveDataMBean.onTabChange select tab3");
             PrimeFaces.current().executeScript("initMap('Москва " + bean.getAddress(object) + "')");
+        }
+
+        if (event.getTab().getId().equals("tab4")) {
+            LOG.info("ArchiveDataMBean.onTabChange select tab4 (charts)");
+            initGraph();
+        } else {
+            if (!charts.isEmpty()) {
+                LOG.info("ArchiveDataMBean.onTabChange clear tab4 (charts) data");
+                charts = new ArrayList<>();
+                PrimeFaces.current().ajax().update("tabView:charts");
+            }
+        }
+
+        //Изменение заголовка панели данных при смене закладки
+        switch (event.getTab().getId()) {
+            case "tab3": {
+                tabName = "Карта";
+                break;
+            }
+            case "tab2": {
+                tabName = "Мнемосхема";
+                break;
+            }
+            case "tab4": {
+                tabName = "Графики";
+                break;
+            }
+            default: tabName = "Архивные данные";
+        }
+        PrimeFaces.current().executeScript("updatePanelHeader()");
+    }
+
+    /**
+     * Метод реализует инициализацию графиков по выделенным строкам в таблице
+     */
+    private void initGraph() {
+        if (!selectedRows.isEmpty()) {
+            charts = new ArrayList<>();
+
+            //Разбиваем выбранные данные на группы по одинаковому paramTypeId
+            Map<Integer, List<DataModel>> chartsMap = new HashMap<>();
+            for (DataModel row: selectedRows) {
+                if (chartsMap.containsKey(row.getParamTypeId())) {
+                    chartsMap.get(row.getParamTypeId()).add(row);
+                } else {
+                    chartsMap.put(row.getParamTypeId(), new ArrayList<>(Collections.singletonList(row)));
+                }
+            }
+
+            int index;
+            for (Map.Entry<Integer, List<DataModel>> entry: chartsMap.entrySet()) {
+                LineChartModel chartModel = new LineChartModel();
+                ChartData chartData = new ChartData();
+
+                //Размещаем на одном контейнере графика графики одного типа
+                index = 0;
+                for (DataModel row: entry.getValue()) {
+                    LineChartDataSet chartDataSet = new LineChartDataSet();
+
+                    //Задаем знаечние графика
+                    //Приводим данные в числовой тип и убираем оттуда все лишнее
+                    List<Number> values = Arrays.stream(row.getData())
+                            .map(e -> {
+                                if (e == null || e.getValue() == null) {
+                                    return null;
+                                } else {
+                                    try {
+                                        return new BigDecimal(e.getValue()).doubleValue();
+                                    } catch (NumberFormatException ex) {
+                                        return null;
+                                    }
+                                }
+                            })
+                            .collect(Collectors.toList());
+                    values = values.subList(0, colSpan);
+
+                    chartDataSet.setData(values);
+                    chartDataSet.setFill(false); //Позволяет делать график разрывным если есть значение null
+                    chartDataSet.setLabel(row.getName());
+                    chartDataSet.setBorderColor(colors.get(index));
+
+                    chartData.addChartDataSet(chartDataSet);
+
+                    //Задаем значения графика для min
+                    List<Number> valuesMin = Arrays.stream(row.getData())
+                            .map(e -> {
+                                if (e == null || e.getMin() == null) {
+                                    return null;
+                                } else {
+                                    try {
+                                        return new BigDecimal(e.getMin()).doubleValue();
+                                    } catch (NumberFormatException ex) {
+                                        return null;
+                                    }
+                                }
+                            })
+                            .collect(Collectors.toList());
+                    valuesMin = valuesMin.subList(0, colSpan);
+                    //Если есть хотя бы одно значение
+                    if (valuesMin.stream().anyMatch(Objects::nonNull)) {
+                        LineChartDataSet chartDataSetMin = new LineChartDataSet();
+
+                        chartDataSetMin.setData(valuesMin);
+                        chartDataSetMin.setFill(false);
+                        chartDataSetMin.setLabel(row.getName() + " Min");
+                        chartDataSetMin.setBorderColor(colors.get(index));
+                        chartDataSetMin.setBorderDash(Arrays.asList(5, 5)); //Делаем линию пунктирной
+
+                        chartData.addChartDataSet(chartDataSetMin);
+                    }
+
+                    //Задаем значения графика для max
+                    List<Number> valuesMax = Arrays.stream(row.getData())
+                            .map(e -> {
+                                if (e == null || e.getMax() == null) {
+                                    return null;
+                                } else {
+                                    try {
+                                        return new BigDecimal(e.getMax()).doubleValue();
+                                    } catch (NumberFormatException ex) {
+                                        return null;
+                                    }
+                                }
+                            })
+                            .collect(Collectors.toList());
+                    valuesMax = valuesMax.subList(0, colSpan);
+                    if (valuesMax.stream().anyMatch(Objects::nonNull)) {
+                        LineChartDataSet chartDataSetMax = new LineChartDataSet();
+
+                        chartDataSetMax.setData(valuesMax);
+                        chartDataSetMax.setLabel(row.getName() + " Max");
+                        chartDataSetMax.setFill(false);
+                        chartDataSetMax.setBorderColor(colors.get(index));
+                        chartDataSetMax.setBorderDash(Arrays.asList(5, 5));
+
+                        chartData.addChartDataSet(chartDataSetMax);
+                    }
+
+                    //Индекс для выбора цвета
+                    index++;
+                    if (index == colors.size()) {
+                        index = 0;
+                    }
+                }
+
+                //Задаем массив значений для оси x
+                List<String> labels = new ArrayList<>();
+                switch (dateType) {
+                    case "Hour": {
+                        for (int i = 0; i < colSpan; i++) {
+                            labels.add(startHeadDate.plusHours(i).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH")) + ":00:00");
+                        }
+                        break;
+                    }
+                }
+                chartData.setLabels(labels);
+
+                LineChartOptions options = new LineChartOptions();
+
+                //Опция подписи для контейнера графика
+                Title title = new Title();
+                title.setDisplay(true);
+                title.setText(entry.getValue().get(0).getParamTypeName()); //Текст подписи контейнера графика
+
+                CartesianScales scales = new CartesianScales();
+                CartesianLinearAxes linearAxes = new CartesianLinearAxes();
+
+                //Опция подписи для оси y
+                CartesianScaleLabel scaleLabel = new CartesianScaleLabel();
+                scaleLabel.setDisplay(true);
+                scaleLabel.setLabelString(entry.getValue().get(0).getSi()); //Текст подписи оси y
+
+                linearAxes.setScaleLabel(scaleLabel);
+                scales.addYAxesData(linearAxes);
+
+                options.setTitle(title);
+                options.setScales(scales);
+
+                chartModel.setOptions(options);
+                chartModel.setData(chartData);
+                charts.add(chartModel);
+            }
+
+            PrimeFaces.current().ajax().update("tabView:charts");
         }
     }
 
@@ -328,5 +535,13 @@ public class ArchiveDataMBean implements Serializable {
 
     public void setDateType(String dateType) {
         this.dateType = dateType;
+    }
+
+    public List<LineChartModel> getCharts() {
+        return charts;
+    }
+
+    public String getTabName() {
+        return tabName;
     }
 }

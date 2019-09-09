@@ -33,9 +33,14 @@
                                  onstart="saveScrollPos()"
                                  oncomplete="setScrollPos(); setTableEvents()"
                                  update=":tabView:dataGrid"/>
+                <p:remoteCommand name="updatePanelHeader" update="panelHeader"/>
             </h:form>
 
-            <p:panel id="dataPanel" header="Архивные данные #{archiveData.headerName}" style="width: 100%; height: 100%;">
+            <p:panel id="dataPanel" style="width: 100%; height: 100%;">
+                <f:facet name="header">
+                    <h:outputText value="#{archiveData.tabName} #{archiveData.headerName}" id="panelHeader" />
+                </f:facet>
+
                 <h:form prependId="false" style="height: 100%;">
                     <p:tabView id="tabView" orientation="bottom" style="height: 100%;">
                         <p:ajax event="tabChange" listener="#{archiveData.onTabChange}"/>
@@ -155,6 +160,14 @@
                         <p:tab id="tab3" title="Карта">
                             <div id="map" style="height: 100%">
                             </div>
+                        </p:tab>
+
+                        <p:tab id="tab4" title="Графики">
+                            <p:panel id="charts" style="height: 100%; overflow: auto;">
+                                <p:repeat value="#{archiveData.charts}" var="chart">
+                                    <p:lineChart model="#{chart}" style="width: 100%; height: 500px; margin-bottom: 20px;" />
+                                </p:repeat>
+                            </p:panel>
                         </p:tab>
                     </p:tabView>
 

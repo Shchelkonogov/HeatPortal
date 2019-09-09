@@ -156,7 +156,7 @@ li.ui-menubar-options {
     height: calc(100% - 37px);
 }
 
-#tabView\:tab1, #tabView\:tab2, #tabView\:tab3 {
+#tabView\:tab1, #tabView\:tab2, #tabView\:tab3, #tabView\:tab4 {
     height: 100%;
     padding: 2px;
 }
@@ -187,4 +187,8 @@ body .ui-datatable .ui-datatable-data>tr>td {
 
 .ui-selectonemenu-label {
     text-overflow: ellipsis;
+}
+
+#tabView\:charts_content {
+    border: none;
 }
