@@ -140,7 +140,7 @@
                                     <p:columns var="column" value="#{archiveData.columns}"
                                                style="white-space: nowrap; text-overflow: ellipsis;"
                                                styleClass="#{rowData[column.propertyColor]}">
-                                        <h:outputText value="#{rowData[column.property]}"/>
+                                        <h:outputText value="#{rowData[column.property]}" title="#{rowData[column.property]}"/>
                                     </p:columns>
 
                                     <p:ajax event="rowSelectCheckbox"/>
