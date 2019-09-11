@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @ManagedBean(name = "archiveData")
@@ -36,7 +37,54 @@ public class ArchiveDataMBean implements Serializable {
 
     private static final Logger LOG = Logger.getLogger(ArchiveDataMBean.class.getName());
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     private static final int COLUMN_SIZE = 31;
+    
+    //Шаблон скрипта для выбора контейнера графика
+    private static StringBuilder jsCtx = new StringBuilder("var ctx = $('#tabView\\\\:charts_content canvas')[%index%].getContext('2d');");
+    //Шаблон скрипта для отображения графика аналоговых дынных
+    private static StringBuilder jsChart = new StringBuilder("new Chart(ctx, {")
+            .append("type: 'line',")
+            .append("data: {")
+            .append("xLabels: %xLabels%,")
+            .append("yLabels: %yLabels%,")
+            .append("datasets: [{")
+            .append("label: '%label%',")
+            .append("data: %data%,")
+            .append("fill: false,")
+            .append("steppedLine: true,")
+            .append("borderColor: 'rgb(75, 192, 192)'")
+            .append("}]")
+            .append("},")
+            .append("options: {")
+            .append("responsive: true,")
+            .append("title: {")
+            .append("display: true,")
+            .append("text: '%text%'")
+            .append("},")
+            .append("scales: {")
+            .append("xAxes: [{")
+            .append("display: true,")
+            .append("scaleLabel: {")
+            .append("display: true,")
+            .append("}")
+            .append("}],")
+            .append("yAxes: [{")
+            .append("type: 'category',")
+            .append("position: 'left',")
+            .append("display: true,")
+            .append("scaleLabel: {")
+            .append("display: true,")
+            .append("labelString: 'Состояния'")
+            .append("},")
+            .append("ticks: {")
+            .append("reverse: true")
+            .append("}")
+            .append("}]")
+            .append("}")
+            .append("}")
+            .append("})");
 
     @EJB
     private ArchiveDataSBean bean;
@@ -109,7 +157,7 @@ public class ArchiveDataMBean implements Serializable {
         columns.clear();
         headerWrapper.clear();
         for (int i = 0; i < colSpan; i++) {
-            String date = startHeadDate.plusHours(i).toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            String date = startHeadDate.plusHours(i).toLocalDate().format(FORMATTER);
             if (headerWrapper.contains(new HeaderWrapper(date))) {
                 headerWrapper.get(headerWrapper.indexOf(new HeaderWrapper(date))).incrementColumnCount();
             } else {
@@ -233,11 +281,16 @@ public class ArchiveDataMBean implements Serializable {
 
             //Разбиваем выбранные данные на группы по одинаковому paramTypeId
             Map<Integer, List<DataModel>> chartsMap = new HashMap<>();
+            List<DataModel> enumCharts = new ArrayList<>();
             for (DataModel row: selectedRows) {
-                if (chartsMap.containsKey(row.getParamTypeId())) {
-                    chartsMap.get(row.getParamTypeId()).add(row);
+                if (row.isAnalog()) {
+                    if (chartsMap.containsKey(row.getParamTypeId())) {
+                        chartsMap.get(row.getParamTypeId()).add(row);
+                    } else {
+                        chartsMap.put(row.getParamTypeId(), new ArrayList<>(Collections.singletonList(row)));
+                    }
                 } else {
-                    chartsMap.put(row.getParamTypeId(), new ArrayList<>(Collections.singletonList(row)));
+                    enumCharts.add(row);
                 }
             }
 
@@ -375,6 +428,68 @@ public class ArchiveDataMBean implements Serializable {
                 charts.add(chartModel);
             }
 
+            for (int i = 0; i < enumCharts.size(); i++) {
+                charts.add(new LineChartModel());
+
+                //Задаем контекст для javaScript
+                String ctx = Pattern.compile("%index%").matcher(jsCtx).replaceAll(String.valueOf(i + chartsMap.keySet().size()));
+                PrimeFaces.current().executeScript(ctx);
+
+                //Задаем конечную дату и список значений для оси x
+                String endDate;
+                List<String> xLabels = new ArrayList<>();
+                switch (dateType) {
+                    case "Hour": {
+                        endDate = startHeadDate.plusHours(colSpan).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH"));
+                        for (int j = 0; j < colSpan; j++) {
+                            xLabels.add(startHeadDate.plusHours(j).format(DateTimeFormatter.ofPattern("''dd.MM.yyyy HH")) + ":00:00'");
+                        }
+                        break;
+                    }
+                    default:
+                        endDate = startHeadDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH"));
+                }
+
+                //Загружаем данные для журнала переключений
+                List<EnumJournal> journal = bean.getEnumJournal(object, enumCharts.get(i).getParamId(),
+                        startHeadDate.format(FORMATTER), endDate);
+
+                //Задаем данные для графика и осей
+                List<String> data;
+                Set<String> yLabels;
+                if (journal.size() > 1) {
+                    //Если есть данные по переключениям то задаем оси x и y и данные
+                    data = journal.stream().map(e -> "'" + e.getValue() + "'").collect(Collectors.toList());
+                    xLabels = journal.stream().map(e -> "'" + e.getDate() + "'").collect(Collectors.toList());
+                    yLabels = journal.stream().map(e -> "'" + e.getValue() + "'").collect(Collectors.toSet());
+                } else {
+                    //Если нет данных по переключениям то задаем оси y и данные
+                    data = Arrays.stream(enumCharts.get(i).getData())
+                            .map(e -> {
+                                if (e == null || e.getValue() == null) {
+                                    return null;
+                                } else {
+                                    return "'" + e.getValue() + "'";
+                                }
+                            })
+                            .collect(Collectors.toList());
+                    data = data.subList(0, colSpan);
+                    yLabels = new HashSet<>(data);
+                    yLabels.remove(null);
+                }
+
+                String name = enumCharts.get(i).getParamTypeName() + " (" + enumCharts.get(i).getName() + ")";
+
+                //Выставляем все параметры в скрипт постройки графика и выполняем его
+                String script = Pattern.compile("%label%").matcher(jsChart).replaceAll(enumCharts.get(i).getName());
+                script = script.replaceAll("%text%", name)
+                        .replaceAll("%xLabels%", xLabels.toString())
+                        .replaceAll("%yLabels%", yLabels.toString())
+                        .replaceAll("%data%", data.toString());
+
+                PrimeFaces.current().executeScript(script);
+            }
+
             PrimeFaces.current().ajax().update("tabView:charts");
         }
     }
@@ -443,7 +558,7 @@ public class ArchiveDataMBean implements Serializable {
                 }
             }
 
-            tempDate = LocalDate.parse(headerWrapper.get(i).getName(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            tempDate = LocalDate.parse(headerWrapper.get(i).getName(), FORMATTER);
             do {
                 for (int j = 0; j < gridData.size(); j++) {
                     gridData.get(j).getData()[index] = new DataValueModel(model.get(j).getData()[tempTime.getHour()].getValue(),

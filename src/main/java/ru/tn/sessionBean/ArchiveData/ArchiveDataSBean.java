@@ -2,6 +2,7 @@ package ru.tn.sessionBean.ArchiveData;
 
 import ru.tn.model.archiveData.DataModel;
 import ru.tn.model.archiveData.DataValueModel;
+import ru.tn.model.archiveData.EnumJournal;
 import ru.tn.sessionBean.cache.ObjectDataCacheSBean;
 
 import javax.annotation.Resource;
@@ -39,6 +40,10 @@ public class ArchiveDataSBean {
             "from table (dsp_0032t.get_obj_params(?)) a order by visible";
     private static final String SQL_PATH = "select dsp_0032t.get_obj_full_path(?) from dual";
     private static final String SQL_GET_ADDRESS = "select get_obj_address(?) from dual";
+
+    private static final String SQL_GET_ENUM_JOURNAL = "select time_stamp, param_cond_name " +
+            "from table (dsp_0032t.sel_journal_tab(?, ?, to_date(?, 'dd.mm.yyyy'), to_date(?, 'dd.mm.yyyy HH24'))) " +
+            "order by time_stamp";
 
     @Resource(name = "jdbc/dataSource")
     private DataSource ds;
@@ -172,6 +177,36 @@ public class ArchiveDataSBean {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Метод для получения информации по переключениям
+     * состояний перечислимых параметров
+     * @param objectId id объекта
+     * @param paramId id параметра
+     * @param startDate начальная дата в формате dd.MM.yyyy
+     * @param endDate конечная дата dd.MM.yyyy HH
+     * @return список данных по переключениям {@link EnumJournal}
+     */
+    public List<EnumJournal> getEnumJournal(int objectId, int paramId, String startDate, String endDate) {
+        List<EnumJournal> result = new ArrayList<>();
+
+        try (Connection connect  = ds.getConnection();
+             PreparedStatement stm = connect.prepareStatement(SQL_GET_ENUM_JOURNAL)) {
+            stm.setInt(1, objectId);
+            stm.setInt(2, paramId);
+            stm.setString(3, startDate);
+            stm.setString(4, endDate);
+
+            ResultSet res = stm.executeQuery();
+            while (res.next()) {
+                result.add(new EnumJournal(res.getString(1), res.getString(2)));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public String getMnemoUrl() {

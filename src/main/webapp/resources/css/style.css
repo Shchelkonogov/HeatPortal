@@ -191,4 +191,5 @@ body .ui-datatable .ui-datatable-data>tr>td {
 
 #tabView\:charts_content {
     border: none;
+    padding: 1px;
 }
