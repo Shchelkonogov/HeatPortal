@@ -16,7 +16,6 @@ import ru.tn.util.AlphaNumComparator;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.view.facelets.FaceletContext;
@@ -31,11 +30,10 @@ public class NavigationMBean implements Serializable {
 
     private static Logger log = Logger.getLogger(NavigationMBean.class.getName());
 
-    @ManagedProperty("#{headerTemplate.userPrincipal}")
-    private String user;
-
     @EJB
     private NavigationSBean bean;
+
+    private String user;
 
     //Переменные для панели закладок
     private String selectedTab;
@@ -64,8 +62,18 @@ public class NavigationMBean implements Serializable {
     private List<ObjTypePropertyModel> searchList;
     private String searchText;
 
+    //Параметры для обработки действия по двойному клику
+    private Object beanName;
+    private String method;
+
     @PostConstruct
     private void init() {
+        user = FacesContext.getCurrentInstance().getExternalContext().getUserPrincipal().getName();
+        FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
+                .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
+        beanName = faceletContext.getAttribute("bean");
+        method = (String) faceletContext.getAttribute("method");
+
         objTypeList = new ArrayList<>();
         objTypeList.addAll(bean.getTypes());
         try {
@@ -204,7 +212,7 @@ public class NavigationMBean implements Serializable {
             log.info("NavigationMBean.onNodeSelect dblClick");
 
             if (((TreeNodeModel) selectedNode.get(selectedTab).getData()).isLeaf()) {
-                PrimeFaces.current().ajax().update(":action");
+                PrimeFaces.current().executeScript("loadData()");
 
                 FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
                         .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
@@ -332,16 +340,8 @@ public class NavigationMBean implements Serializable {
         }
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public Map<String, TreeNode> getRoot() {
-        return root;
+    public TreeNode getRootItem(String name) {
+        return root.get(name);
     }
 
     public long getSelectedSearch() {
@@ -382,5 +382,13 @@ public class NavigationMBean implements Serializable {
 
     public void setSelectedNodeId(String selectedNodeId) {
         this.selectedNodeId = selectedNodeId;
+    }
+
+    public Object getBeanName() {
+        return beanName;
+    }
+
+    public String getMethod() {
+        return method;
     }
 }

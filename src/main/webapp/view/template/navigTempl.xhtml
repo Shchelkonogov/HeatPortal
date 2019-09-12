@@ -4,8 +4,9 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui">
     <p:panel id="navigPanel" header="Навигация" style="width: 100%; height: 100%;">
-
         <h:form id="navig" style="height: calc(100% - 43px)">
+            <p:remoteCommand name="loadData" action="#{navigation.beanName[navigation.method](navigation.selectedNodeId)}" />
+
             <h:panelGrid columns="2" styleClass="fieldWrapper">
                 <p:outputLabel for="objType" value="Тип объекта:"/>
                 <p:selectOneMenu id="objType" value="#{navigation.selectedObjType}" dynamic="true"
@@ -20,7 +21,8 @@
 
             <p:tabView id="navigateTab" prependId="false" style="height: calc(100% - 89px); margin-bottom: 10px">
                 <p:tab id="org" title="Предприятие">
-                    <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.root['org']}" var="node" dynamic="true"
+                    <p:tree id="orgTree" widgetVar="orgTreeWidget" value="#{navigation.getRootItem('org')}"
+                            var="node" dynamic="true"
                             selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
                             styleClass="tree" style="width: 100%; padding: 0;">
                         <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
@@ -38,7 +40,8 @@
                 </p:tab>
 
                 <p:tab id="ter" title="Территория">
-                    <p:tree id="terTree" widgetVar="terTreeWidget" value="#{navigation.root['ter']}" var="node" dynamic="true"
+                    <p:tree id="terTree" widgetVar="terTreeWidget" value="#{navigation.getRootItem('ter')}"
+                            var="node" dynamic="true"
                             selectionMode="single" selection="#{navigation.selectedNode}" cache="false"
                             styleClass="tree" style="width: 100%; padding: 0;">
                         <p:treeNode expandedIcon="pi pi-folder-open" collapsedIcon="pi pi-folder">
@@ -76,10 +79,6 @@
                 <p:commandButton value="Перестроить" action="#{navigation.updateSearch()}"
                                  update=":navig:navigateTab"/>
             </h:panelGrid>
-        </h:form>
-
-        <h:form id="action">
-            #{bean[method](navigation.selectedNodeId)}
         </h:form>
     </p:panel>
 </ui:composition>
