@@ -12,7 +12,7 @@
     <ui:composition template="/view/template/portalTempl.xhtml">
         <ui:param name="bean" value="#{archiveData}"/>
         <ui:param name="method" value="showName"/>
-        <ui:param name="updatePath" value=":dataPanel"/>
+        <ui:param name="updatePath" value=":dataPanel :panelHeader"/>
         <ui:param name="invokeScript" value="setTableEvents()"/>
 
         <ui:define name="left-pane">
