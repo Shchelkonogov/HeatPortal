@@ -65,6 +65,8 @@ public class NavigationMBean implements Serializable {
     //Параметры для обработки действия по двойному клику
     private Object beanName;
     private String method;
+    private String invokeScript;
+    private String update;
 
     @PostConstruct
     private void init() {
@@ -73,6 +75,8 @@ public class NavigationMBean implements Serializable {
                 .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
         beanName = faceletContext.getAttribute("bean");
         method = (String) faceletContext.getAttribute("method");
+        invokeScript = (String) faceletContext.getAttribute("invokeScript");
+        update = (String) faceletContext.getAttribute("updatePath");
 
         objTypeList = new ArrayList<>();
         objTypeList.addAll(bean.getTypes());
@@ -213,14 +217,6 @@ public class NavigationMBean implements Serializable {
 
             if (((TreeNodeModel) selectedNode.get(selectedTab).getData()).isLeaf()) {
                 PrimeFaces.current().executeScript("loadData()");
-
-                FaceletContext faceletContext = (FaceletContext) FacesContext.getCurrentInstance()
-                        .getAttributes().get(FaceletContext.FACELET_CONTEXT_KEY);
-                PrimeFaces.current().ajax().update((String) faceletContext.getAttribute("updatePath"));
-
-                if (!faceletContext.getAttribute("invokeScript").equals("")) {
-                    PrimeFaces.current().executeScript((String) faceletContext.getAttribute("invokeScript"));
-                }
             } else {
                 if (selectedNode.get(selectedTab).isExpanded()) {
                     setExpandedNode(false, selectedNode.get(selectedTab));
@@ -390,5 +386,13 @@ public class NavigationMBean implements Serializable {
 
     public String getMethod() {
         return method;
+    }
+
+    public String getInvokeScript() {
+        return invokeScript;
+    }
+
+    public String getUpdate() {
+        return update;
     }
 }
