@@ -7,33 +7,40 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <title>Login form</title>
-
-    <style type="text/css">
-        #container {
-            display: table;
-            margin: 0 auto;
-            border: 1px solid #ddd;
-            padding: 5px;
-        }
-    </style>
+    <h:outputStylesheet library="css" name="loginStyles.css" />
+    <title>#{loginMsg['title']}</title>
 </h:head>
 <h:body>
-    <div id="container">
-        <h:form id="login" onsubmit="action='j_security_check'" prependId="false">
-            <h:panelGrid columns="2">
-                <p:outputLabel for="j_username" value="Username"/>
-                <p:inputText id="j_username"/>
-                <p:outputLabel for="j_password" value="Password"/>
-                <p:password id="j_password" autocomplete="off"/>
-            </h:panelGrid>
-            <div align="center">
-                <p:commandButton id="submit" value="Login" ajax="false" />
-            </div>
-        </h:form>
-        <div align="center">
-            <h:outputText rendered="#{param['wrongCredentials'] != null}" value="Wrong username or password" />
-        </div>
-    </div>
+    <h:form id="login" styleClass="login" prependId="false" onsubmit="action='j_security_check'">
+        <h:graphicImage styleClass="comWidth imageStyle" library="img" name="tecon.png" />
+
+        <p:outputLabel styleClass="outLabelStyle" value="#{loginMsg['login']}" />
+
+        <p:inputText id="j_username" styleClass="comWidth inputLoginStyle" required="true"
+                     requiredMessage="#{loginMsg['requiredMessage']}"
+                     validatorMessage="#{loginMsg['size']}" maxlength="30">
+            <p:ajax event="blur" update="userMessage" />
+            <f:validateLength minimum="3" maximum="20" />
+        </p:inputText>
+        <p:watermark for="j_username" value="#{loginMsg['username']}"/>
+        <p:message id="userMessage" styleClass="comWidth" for="j_username" display="text" />
+
+        <p:password id="j_password" styleClass="comWidth" autocomplete="off" required="true"
+                    requiredMessage="#{loginMsg['requiredMessage']}" maxlength="40">
+            <p:ajax event="blur" update="passwordMessage" />
+        </p:password>
+        <p:watermark for="j_password" value="#{loginMsg['password']}"/>
+        <p:message id="passwordMessage" styleClass="comWidth" for="j_password" display="text" />
+
+        <p:commandButton id="submit" styleClass="comWidth buttonStyle" value="#{loginMsg['login.button']}" ajax="false"
+                         validateClient="true" />
+
+        <h:outputText styleClass="errorStyle" rendered="#{param['wrongCredentials'] != null}"
+                      value="#{loginMsg['error']}" />
+    </h:form>
+
+    <ui:insert>
+        <ui:include src="/view/template/footerTempl.xhtml" />
+    </ui:insert>
 </h:body>
 </html>

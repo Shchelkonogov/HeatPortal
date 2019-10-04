@@ -1,0 +1,36 @@
+body {
+    background-color: #f5f5f5;
+}
+
+.login {
+    margin: 0 auto;
+    width: 300px;
+    text-align: center;
+}
+
+.comWidth {
+    width: 100%;
+}
+
+.outLabelStyle {
+    font-weight: bold;
+    font-size: x-large !important;
+}
+
+.imageStyle {
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.inputLoginStyle {
+    margin-top: 40px !important;
+}
+
+.buttonStyle {
+    margin-bottom: 10px !important;
+}
+
+.errorStyle {
+    color: #FA690E;
+    font-size: 1.1em;
+}

@@ -10,6 +10,10 @@
             <base-name>property.global</base-name>
             <var>msg</var>
         </resource-bundle>
+        <resource-bundle>
+            <base-name>property.login</base-name>
+            <var>loginMsg</var>
+        </resource-bundle>
         <locale-config>
             <default-locale>ru</default-locale>
             <supported-locale>en</supported-locale>
